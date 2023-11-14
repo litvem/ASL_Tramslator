@@ -5,6 +5,6 @@
 <requirement description>
 
 ## Acceptance criteria
-- <acceptance criteria>
-- <acceptance criteria>
-- <acceptance criteria>
+- [ ] <acceptance criteria>
+- [ ] <acceptance criteria>
+- [ ] <acceptance criteria>
