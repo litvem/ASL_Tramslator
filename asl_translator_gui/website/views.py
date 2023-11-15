@@ -7,3 +7,7 @@ def home(request):
 # Login view
 def login(request):
     return render(request, "login.html", {})
+
+# Model training view
+def training(request):
+    return render(request, "training.html", {})
