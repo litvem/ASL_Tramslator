@@ -1,1 +1,50 @@
-<h1>Welcome to ASL Translator Website!!!</h1>
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>ASL Homepage</title>
+        <!--Favicon-->
+        <link rel="icon" type="image/x-icon" href="{% static 'assets/favicon.ico'%}" />
+        <!--Core theme CSS-->
+        <link href="{% static 'css/home_styles.css'%}" rel="stylesheet" />
+    </head>
+
+    <body>
+        <!--Navigation-->
+        <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
+            <div class="container px-5">
+                <a class="navbar-brand" href="#page_top">
+                    <img src="{% static 'assets/icon.png'%}" width="30" height="30" class="d-inline-block align-top" alt="">
+                    ASL Translator
+                </a>
+                <a class="navbar-item" href="/login">Admin</a>
+            </div>
+        </nav>
+
+        <!--Source: https://codepen.io/anithvishwanath/pen/qYrWJJ-->
+        <div class="wrapper">
+            <div class="container">
+            <h1>Upload a file</h1>
+            <div class="upload-container">
+                <div class="border-container">
+                <div class="icons fa-4x">
+                    <i class="fas fa-file-image" data-fa-transform="shrink-3 down-2 left-6 rotate--45"></i>
+                    <i class="fas fa-file-alt" data-fa-transform="shrink-2 up-4"></i>
+                    <i class="fas fa-file-pdf" data-fa-transform="shrink-3 down-2 right-6 rotate-45"></i>
+                </div>
+                <!--<input type="file" id="file-upload">-->
+                <p>Drag and drop files here, or 
+                    <a href="#" id="file-browser">browse</a> your computer.</p>
+                <p>Only .mp4 files are permitted</p>
+                </div>
+            </div>
+            </div>
+        </div>
+        <script src="{% static 'jc/home_scripts.js'%}"></script>
+    </body>
+</html>
