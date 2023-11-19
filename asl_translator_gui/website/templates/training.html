@@ -1,24 +1,18 @@
+{% extends "base.html" %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta name="description" content="" />
-        <meta name="author" content="" />
-        <title>Model training</title>
-        <!--Favicon-->
-        <link rel="icon" type="image/x-icon" href="{% static 'assets/favicon.ico'%}" />
-        <!--Core theme CSS-->
-        <link href="{% static 'css/training_styles.css'%}" rel="stylesheet" />
-    </head>
+{% block content %}
+<head>
+    <title>Model training</title>
+      <!--Core theme CSS-->
+    <link href="{% static 'css/training_styles.css'%}" rel="stylesheet" />
+</head>
 
-    <body>
-        <!--Source: https://codepen.io/hbuchel/pen/jOGbGE-->
-        <h1>History of model training</h1>
-        <main>
-            <table>
+<body>
+    <!--Source: https://codepen.io/hbuchel/pen/jOGbGE-->
+    <h1>History of model training</h1>
+    <main>
+        <table>
             <thead>
                 <tr>
                     <th>Model ID</th>
@@ -70,7 +64,6 @@
             </tbody>
             </table>
         </main>
-        <script src="{% static 'jc/training_scripts.js'%}"></script>
-    </body>
-</html>
-  
+    <script src="{% static 'jc/training_scripts.js'%}"></script>
+</body>
+{% endblock %}  

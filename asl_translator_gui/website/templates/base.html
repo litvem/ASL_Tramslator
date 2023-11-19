@@ -1,0 +1,33 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>ASL Translator</title>
+        <!--Favicon-->
+        <link rel="icon" type="image/x-icon" href="{% static 'assets/favicon.ico'%}" />
+        <!--Core theme CSS-->
+        <link href="{% static 'css/home_styles.css'%}" rel="stylesheet" />
+    </head>
+
+    <body>
+        <!--Navbar-->
+        {% include "navbar.html" %}   
+        
+        <!--Individual content of evety page-->
+        {% block content %}
+        {% endblock %}
+
+        <!--Footer-->
+        <footer class ="py-5 bg-dark">
+            <div class="container">
+                <p class="m-0 text-center text-white">Copyright &copy; ASL Translator 2023</p>
+            </div>
+        </footer>
+        <script src="{% static 'jc/home_scripts.js'%}"></script>
+    </body>
+</html>

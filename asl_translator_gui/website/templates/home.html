@@ -1,31 +1,8 @@
-{% load static %}
+{% extends "base.html" %}
+{% load static %}  
 
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta name="description" content="" />
-        <meta name="author" content="" />
-        <title>ASL Homepage</title>
-        <!--Favicon-->
-        <link rel="icon" type="image/x-icon" href="{% static 'assets/favicon.ico'%}" />
-        <!--Core theme CSS-->
-        <link href="{% static 'css/home_styles.css'%}" rel="stylesheet" />
-    </head>
-
+{% block content%}
     <body>
-        <!--Navigation-->
-        <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
-            <div class="container px-5">
-                <a class="navbar-brand" href="#page_top">
-                    <img src="{% static 'assets/icon.png'%}" width="30" height="30" class="d-inline-block align-top" alt="">
-                    ASL Translator
-                </a>
-                <a class="navbar-item" href="/login">Admin</a>
-            </div>
-        </nav>
-
         <!--Source: https://codepen.io/anithvishwanath/pen/qYrWJJ-->
         <div class="wrapper">
             <div class="container">
@@ -47,4 +24,5 @@
         </div>
         <script src="{% static 'jc/home_scripts.js'%}"></script>
     </body>
-</html>
+    
+{% endblock %}
