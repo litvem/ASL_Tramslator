@@ -1,7 +1,7 @@
 /* Source: https://codepen.io/anithvishwanath/pen/qYrWJJ */
-$("#file-upload").css("opacity", "0");
+$("#input_frame").css("opacity", "0");
 
-$("#file-browser").click(function(e) {
+$("#file_browser").click(function(e) {
   e.preventDefault();
-  $("#file-upload").trigger("click");
+  $("#input_file").trigger("click");
 });

@@ -4,65 +4,79 @@
 {% block content %}
 <head>
     <title>Model training</title>
-      <!--Core theme CSS-->
-    <link href="{% static 'css/training_styles.css'%}" rel="stylesheet" />
 </head>
 
-<body>
-    <!--Source: https://codepen.io/hbuchel/pen/jOGbGE-->
-    <h1>History of model training</h1>
-    <main>
-        <table>
-            <thead>
-                <tr>
-                    <th>Model ID</th>
-                    <th> Date of training</th>
-                    <th>Efficiency</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tfoot>
-                <tr>
-                <th colspan='4'>
-                    <a data-toggle="collapse" class="collapse" href="#collapsableWindow">Re-train model</a>
-                </th>
-                </tr>
-            </tfoot>
-            <tbody>
-                <tr>
-                <td data-title='Model ID'>1</td>
-                <td data-title='Date of training'>2023-11-15</td>
-                <td data-title="Efficiency">93.9%</td>
-                <td class='deploy'>
-                    <a class='button' href='#'>Deploy</a>
-                </td>
-                </tr>
-                <tr>
-                <td data-title='Model ID'>2</td>
-                <td data-title='Date of training'>2023-10-12</td>
-                <td data-title="Efficiency">81.6%</td>
-                <td class='deploy'>
-                    <a class='button' href='#'>Deploy</a>
-                </td>
-                </tr>
-                <tr>
-                <td data-title='Model ID'>3</td>
-                <td data-title='Date of training'>2023-10-01</td>
-                <td data-title="Efficiency">73.4%</td>
-                <td class='deploy'>
-                    <a class='button' href='#'>Deploy</a>
-                </td>
-                </tr>
-                <tr>
-                <td data-title='Model ID'>4</td>
-                <td data-title='Date of training'>2023-09-27</td>
-                <td data-title="Efficiency">69.0%</td>
-                <td class='deploy'>
-                    <a class='button' href='#'>Deploy</a>
-                </td>
-                </tr>
-            </tbody>
-            </table>
+<body class="d-flex flex-column">
+    <main class="flex-shrink-0">
+        <header class="py-5">
+            <div class="container px-5">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8 col-xxl-6">
+                        <div class="text-center my-5">
+                            <h1 class="fw-bolder mb-3">History of model training</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="container">
+            <div class="row">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Model ID</th>
+                            <th> Date of training</th>
+                            <th>Efficiency</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                        <th colspan='4'>
+                            <a data-toggle="collapse" class="collapse" href="#collapsableWindow">Re-train model</a>
+                        </th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        <tr>
+                            <td data-title='Model ID'>1</td>
+                            <td data-title='Date of training'>2023-11-15</td>
+                            <td data-title="Efficiency">93.9%</td>
+                            <td class='deploy'>
+                                <a class='btn btn-primary' href='#'>Deploy</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td data-title='Model ID'>2</td>
+                            <td data-title='Date of training'>2023-10-12</td>
+                            <td data-title="Efficiency">81.6%</td>
+                            <td class='deploy'>
+                                <a class='btn btn-primary' href='#'>Deploy</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td data-title='Model ID'>3</td>
+                            <td data-title='Date of training'>2023-10-01</td>
+                            <td data-title="Efficiency">73.4%</td>
+                            <td class='deploy'>
+                                <a class='btn btn-primary' href='#'>Deploy</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td data-title='Model ID'>4</td>
+                            <td data-title='Date of training'>2023-09-27</td>
+                            <td data-title="Efficiency">69.0%</td>
+                            <td class='deploy'>
+                                <a class='btn btn-primary' href='#'>Deploy</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+       
         </main>
     <script src="{% static 'jc/training_scripts.js'%}"></script>
 </body>

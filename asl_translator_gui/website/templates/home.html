@@ -2,27 +2,36 @@
 {% load static %}  
 
 {% block content%}
-    <body>
-        <!--Source: https://codepen.io/anithvishwanath/pen/qYrWJJ-->
-        <div class="wrapper">
-            <div class="container">
-            <h1>Upload a file</h1>
-            <div class="upload-container">
-                <div class="border-container">
-                <div class="icons fa-4x">
-                    <i class="fas fa-file-image" data-fa-transform="shrink-3 down-2 left-6 rotate--45"></i>
-                    <i class="fas fa-file-alt" data-fa-transform="shrink-2 up-4"></i>
-                    <i class="fas fa-file-pdf" data-fa-transform="shrink-3 down-2 right-6 rotate-45"></i>
-                </div>
-                <!--<input type="file" id="file-upload">-->
-                <p>Drag and drop files here, or 
-                    <a href="#" id="file-browser">browse</a> your computer.</p>
-                <p>Only .mp4 files are permitted</p>
+<head>
+    <title>Home</title>
+</head>
+
+<body class="d-flex flex-column">
+    <main class="flex-shrink-0">
+        <header class="py-5">
+            <div class="container px-5">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8 col-xxl-6">
+                        <div class="text-center my-5">
+                            <h1 class="fw-bolder mb-3">Welcome to AST Translator</h1>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </header>
+        <div class="container">
+            <div class="row">
+                <div class="upload_frame">
+                    <label for="input-file" id="drop_area">
+                        <input type="file" accept="mp4" id="input-file" hidden />
+                        <div id="img_view">
+                            <img src="{% static 'assets/upload.png' %}">
+                            <p>Drag and drop file here,<br>or<br><a href="#" id="file-browser">browse</a> your computer.</p>
+                        </div>
+                    </label>
+                </div>
             </div>
         </div>
-        <script src="{% static 'jc/home_scripts.js'%}"></script>
-    </body>
-    
+    </main>
+</body>
 {% endblock %}

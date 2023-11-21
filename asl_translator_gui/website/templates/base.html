@@ -8,24 +8,26 @@
         <meta name="description" content="" />
         <meta name="author" content="" />
         <title>ASL Translator</title>
-        <!--Favicon-->
+        <!-- Favicon -->
         <link rel="icon" type="image/x-icon" href="{% static 'assets/favicon.ico'%}" />
-        <!--Core theme CSS-->
-        <link href="{% static 'css/home_styles.css'%}" rel="stylesheet" />
+        <!-- Core theme CSS -->
+        <link href="{% static 'css/styles.css'%}" rel="stylesheet" />
     </head>
 
     <body>
-        <!--Navbar-->
-        {% include "navbar.html" %}   
-        
-        <!--Individual content of evety page-->
+        <!-- Navbar -->
+        {% include "navbar.html" %}
+
+        <!-- Individual content of each page -->
         {% block content %}
         {% endblock %}
 
-        <!--Footer-->
-        <footer class ="py-5 bg-dark">
-            <div class="container">
-                <p class="m-0 text-center text-white">Copyright &copy; ASL Translator 2023</p>
+        <!-- Footer-->
+        <footer class="bg-dark py-4 mt-auto">
+            <div class="container px-5">
+                <div class="row align-items-center justify-content-center flex-column flex-sm-row">
+                    <div class="col-auto small m-0 text-white">Copyright &copy; ASL Translator 2023</div>
+                </div>
             </div>
         </footer>
         <script src="{% static 'jc/home_scripts.js'%}"></script>
