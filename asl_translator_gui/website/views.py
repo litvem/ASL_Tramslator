@@ -37,3 +37,7 @@ def logout_user(request):
 # Model training
 def training(request):
     return render(request, "training.html", {})
+
+# Live translation
+def live(request):
+    return render(request, "live.html", {})
