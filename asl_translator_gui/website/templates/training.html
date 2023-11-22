@@ -4,6 +4,35 @@
 {% block content %}
 <head>
     <title>Model training</title>
+    <style>
+        .fixed_header {
+          width: 900px;
+          table-layout: auto;
+          border-collapse: collapse;
+          margin-left: auto;
+          margin-right: auto;
+          margin-top: -40px;
+        }
+        .fixed_header tbody {
+          display: block;
+          width: 100%;
+          overflow: auto;
+          height: 190px;
+        }
+        .fixed_header thead tr {
+          display: block;
+        }
+        .fixed_header thead {
+          background: black;
+          color: #fff;
+        }
+        .fixed_header th,
+        .fixed_header td {
+          padding: 5px;
+          text-align: center;
+          width: 200px;
+        }
+      </style>
 </head>
 
 <body class="d-flex flex-column">
@@ -22,12 +51,12 @@
         
         <div class="container">
             <div class="row">
-                <table>
+                <table class="fixed_header">
                     <thead>
                         <tr>
                             <th>Model ID</th>
-                            <th> Date of training</th>
-                            <th>Efficiency</th>
+                            <th>Date of training</th>
+                            <th>Accuracy</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -42,7 +71,7 @@
                         <tr>
                             <td data-title='Model ID'>1</td>
                             <td data-title='Date of training'>2023-11-15</td>
-                            <td data-title="Efficiency">93.9%</td>
+                            <td data-title="Accuracy">93.9%</td>
                             <td class='deploy'>
                                 <a class='btn btn-primary' href='#'>Deploy</a>
                             </td>
@@ -50,7 +79,7 @@
                         <tr>
                             <td data-title='Model ID'>2</td>
                             <td data-title='Date of training'>2023-10-12</td>
-                            <td data-title="Efficiency">81.6%</td>
+                            <td data-title="Accuracy">81.6%</td>
                             <td class='deploy'>
                                 <a class='btn btn-primary' href='#'>Deploy</a>
                             </td>
@@ -58,7 +87,7 @@
                         <tr>
                             <td data-title='Model ID'>3</td>
                             <td data-title='Date of training'>2023-10-01</td>
-                            <td data-title="Efficiency">73.4%</td>
+                            <td data-title="Accuracy">73.4%</td>
                             <td class='deploy'>
                                 <a class='btn btn-primary' href='#'>Deploy</a>
                             </td>
@@ -66,7 +95,7 @@
                         <tr>
                             <td data-title='Model ID'>4</td>
                             <td data-title='Date of training'>2023-09-27</td>
-                            <td data-title="Efficiency">69.0%</td>
+                            <td data-title="Accuracy">69.0%</td>
                             <td class='deploy'>
                                 <a class='btn btn-primary' href='#'>Deploy</a>
                             </td>
