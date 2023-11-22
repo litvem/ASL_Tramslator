@@ -1,10 +1,11 @@
 from django.db import models
 import datetime
-
-# User model
-class Admin(models.Model):
-    username = models.CharField(max_length=30)
-    password = models.CharField(max_length=30)
+    
+# Model training
+class Training(models.Model):
+    model_id = models.AutoField(primary_key=True)
+    training_date = models.DateField(default=datetime.datetime.today)
+    accuracy = models.DecimalField(default=0, decimal_places=2, max_digits=5)
 
     def __str__(self):
-        return f'{self.username} {self.password}'
+        return self.model_id
