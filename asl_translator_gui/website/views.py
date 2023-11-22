@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
+from .models import Training
 
 # Home
 def home(request):
@@ -36,7 +37,8 @@ def logout_user(request):
 
 # Model training
 def training(request):
-    return render(request, "training.html", {})
+    training_list = Training.objects.all()
+    return render(request, "training.html", {'training_list': training_list})
 
 # Live translation
 def live(request):

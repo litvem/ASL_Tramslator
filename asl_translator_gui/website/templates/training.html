@@ -6,7 +6,7 @@
     <title>Model training</title>
     <style>
         .fixed_header {
-          width: 900px;
+          width: 750px;
           table-layout: auto;
           border-collapse: collapse;
           margin-left: auto;
@@ -68,38 +68,17 @@
                         </tr>
                     </tfoot>
                     <tbody>
+                        {{training_list}}
+                        {{% for training in training_list %}}
                         <tr>
-                            <td data-title='Model ID'>1</td>
-                            <td data-title='Date of training'>2023-11-15</td>
-                            <td data-title="Accuracy">93.9%</td>
+                            <td data-title='Model ID'>training.modelid</td>
+                            <td data-title='Date of training'>training.trainingdate</td>
+                            <td data-title="Accuracy">training.accuracy</td>
                             <td class='deploy'>
-                                <a class='btn btn-primary' href='#'>Deploy</a>
+                                <a class='btn btn-dark' href='#'>Deploy</a>
                             </td>
                         </tr>
-                        <tr>
-                            <td data-title='Model ID'>2</td>
-                            <td data-title='Date of training'>2023-10-12</td>
-                            <td data-title="Accuracy">81.6%</td>
-                            <td class='deploy'>
-                                <a class='btn btn-primary' href='#'>Deploy</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-title='Model ID'>3</td>
-                            <td data-title='Date of training'>2023-10-01</td>
-                            <td data-title="Accuracy">73.4%</td>
-                            <td class='deploy'>
-                                <a class='btn btn-primary' href='#'>Deploy</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td data-title='Model ID'>4</td>
-                            <td data-title='Date of training'>2023-09-27</td>
-                            <td data-title="Accuracy">69.0%</td>
-                            <td class='deploy'>
-                                <a class='btn btn-primary' href='#'>Deploy</a>
-                            </td>
-                        </tr>
+                        {{% endfor %}}
                     </tbody>
                 </table>
             </div>
