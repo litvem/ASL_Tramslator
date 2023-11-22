@@ -7,5 +7,8 @@ class Training(models.Model):
     trainingdate = models.DateField(default=datetime.datetime.today)
     accuracy = models.DecimalField(max_digits=5, decimal_places=2)
 
+    class Meta:
+        ordering = ('-accuracy',)
+
     def __str__(self):
         return str(self.modelid)

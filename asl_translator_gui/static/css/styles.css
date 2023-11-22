@@ -394,7 +394,6 @@ svg {
 table {
   caption-side: bottom;
   border-collapse: collapse;
-  width: 100%;
 }
 
 caption {
@@ -570,6 +569,77 @@ progress {
   display: none !important;
 }
 
+.fixed_header {
+  width: 750px;
+  table-layout: auto;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: -40px;
+}
+.fixed_header tbody {
+  display: block;
+  width: 100%;
+  overflow: auto;
+  height: 190px;
+}
+.fixed_header thead tr {
+  display: block;
+}
+.fixed_header thead {
+  background: black;
+  color: #fff;
+}
+.fixed_header th,
+.fixed_header td {
+  padding: 5px;
+  text-align: center;
+  width: 200px;
+}
+.collapsible {
+background-color: black;
+color: #fff;
+cursor: pointer;
+padding: 18px;
+width: 750px;
+margin-left: auto;
+margin-right: auto;
+border: none;
+text-align: center;
+outline: none;
+font-size: 15px;
+}
+.active, .collapsible:hover {
+background-color: #424649;
+}
+.content {
+padding: 0 18px;
+display: none;
+overflow: hidden;
+background-color: #fff;
+}
+.table-sortable th {
+    cursor: pointer;
+}
+
+.table-sortable .th-sort-asc::after {
+    content: "\25b4";
+}
+
+.table-sortable .th-sort-desc::after {
+    content: "\25be";
+}
+
+.table-sortable .th-sort-asc::after,
+.table-sortable .th-sort-desc::after {
+    margin-left: 5px;
+}
+
+.table-sortable .th-sort-asc,
+.table-sortable .th-sort-desc {
+    background: rgba(0, 0, 0, 0.1);
+}
+
 .lead {
   font-size: 1.25rem;
   font-weight: 300;
@@ -723,6 +793,17 @@ progress {
   padding-left: calc(var(--bs-gutter-x) * 0.5);
   margin-right: auto;
   margin-left: auto;
+}
+
+.container-table {
+  --bs-gutter-x: 1.5rem;
+  --bs-gutter-y: 0;
+  width: 750px;
+  padding-right: calc(var(--bs-gutter-x) * 0.5);
+  padding-left: calc(var(--bs-gutter-x) * 0.5);
+  margin-right: auto;
+  margin-left: auto;
+  margin-top: -40px;
 }
 
 @media (min-width: 576px) {

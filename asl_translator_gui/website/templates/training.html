@@ -4,35 +4,6 @@
 {% block content %}
 <head>
     <title>Model training</title>
-    <style>
-        .fixed_header {
-          width: 750px;
-          table-layout: auto;
-          border-collapse: collapse;
-          margin-left: auto;
-          margin-right: auto;
-          margin-top: -40px;
-        }
-        .fixed_header tbody {
-          display: block;
-          width: 100%;
-          overflow: auto;
-          height: 190px;
-        }
-        .fixed_header thead tr {
-          display: block;
-        }
-        .fixed_header thead {
-          background: black;
-          color: #fff;
-        }
-        .fixed_header th,
-        .fixed_header td {
-          padding: 5px;
-          text-align: center;
-          width: 200px;
-        }
-      </style>
 </head>
 
 <body class="d-flex flex-column">
@@ -49,9 +20,9 @@
             </div>
         </header>
         
-        <div class="container">
+        <div class="container-table">
             <div class="row">
-                <table class="fixed_header">
+                <table class="fixed_header table-sortable">
                     <thead>
                         <tr>
                             <th>Model ID</th>
@@ -68,23 +39,33 @@
                         </tr>
                     </tfoot>
                     <tbody>
-                        {{% for training in training_list %}}
+                        {% for training in training_list %}
                         <tr>
                             <td data-title='Model ID'> {{training.modelid}} </td>
                             <td data-title='Date of training'> {{training.trainingdate}} </td>
-                            <td data-title="Accuracy"> {{training.accuracy}} </td>
+                            <td data-title="Accuracy"> {{training.accuracy}}% </td>
                             <td class='deploy'>
                                 <a class='btn btn-dark' href='#'>Deploy</a>
                             </td>
                         </tr>
-                        {{% endfor %}}
+                        {% endfor %}
                     </tbody>
                 </table>
+                <button type="button" class="collapsible">Retrain Model</button>
+                <div class="content">
+                    <div class="upload_frame">
+                        <label for="input-file" id="drop_area">
+                            <input type="file" accept="mp4" id="input-file" hidden />
+                            <div id="img_view">
+                                <img src="{% static 'assets/upload.png' %}">
+                                <p>Drag and drop file here,<br>or<br><a href="#" id="file-browser">browse</a> your computer.</p>
+                            </div>
+                        </label>
+                    </div>
+                </div> 
             </div>
         </div>
-
-       
-        </main>
-    <script src="{% static 'jc/training_scripts.js'%}"></script>
+    </main>
+    <script src="{% static 'js/training_scripts.js'%}"></script>
 </body>
 {% endblock %}  
