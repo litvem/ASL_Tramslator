@@ -20,8 +20,8 @@
             </div>
         </header>
         <div class="container">
-            <div class="row">
-                <div class="upload_frame">
+            <div class="row" id="frame">
+                <!--div class="upload_frame">
                     <label for="input-file" id="drop_area">
                         <input type="file" accept="mp4" id="input-file" hidden />
                         <div id="img_view">
@@ -29,9 +29,18 @@
                             <p>Drag and drop file here,<br>or<br><a href="#" id="file-browser">browse</a> your computer.</p>
                         </div>
                     </label>
+                </div-->
+                <div class="drag-area">
+                    <div class="icon">
+                        <img src="{% static 'assets/upload.png' %}" width="110" height="75"> 
+                    </div>
+                    <p>Drag and drop to upload file</p>
+                    <p>OR</p>
+                    <button class="btn btn-primary btn-lg">Browse files</button>
                 </div>
             </div>
         </div>
     </main>
+    <script src="{% static 'js/home_scripts.js' %}"></script>
 </body>
 {% endblock %}
