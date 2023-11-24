@@ -31,10 +31,7 @@ def extract_keypoints(results):
     lh = np.array([[res.x, res.y, res.z] for res in results.left_hand_landmarks.landmark]).flatten() if results.left_hand_landmarks else np.zeros(21*3)
     rh = np.array([[res.x, res.y, res.z] for res in results.right_hand_landmarks.landmark]).flatten() if results.right_hand_landmarks else np.zeros(21*3)
     result = np.concatenate([pose, face, lh, rh])
-    result = result.reshape(1, -1)
-    scaler_standard = StandardScaler()
-    result_standard = scaler_standard.fit_transform(result)
-    return result_standard
+    return result
 
 def save_frames(file_name, sequence_length, path_to_np_video):
     video = cv2.VideoCapture(file_name)
@@ -87,9 +84,8 @@ def save_videos(data_point, videos_address, sequence_length, np_address, video_i
 
         except youtube_dl.DownloadError as e:
             print("Error during download:", e)
-
     # crop video
-    subprocess.call(['ffmpeg', '-y', '-i',
+    subprocess.call(['C:/Users/yasi7/anaconda3/pkgs/ffmpeg-4.3.1-ha925a31_0/Library/bin/ffmpeg.exe', '-y', '-i',
                      dir_name + "/" + "current" + ".mp4",
                      '-ss', str(start_time), '-t', str(end_time - start_time), file_name])
 
@@ -140,8 +136,8 @@ def prepare_data(X, DATA_PATH, actions, sequence_length, videos_folder, DB_path)
         print(len(parsed_data_json))
 
 
-    if not os.path.exists("test"):
-        os.makedirs("test")
+    if not os.path.exists("test1"):
+        os.makedirs("test1")
     
     if not os.path.exists(videos_folder):
         os.makedirs(videos_folder)
@@ -168,12 +164,12 @@ def prepare_data(X, DATA_PATH, actions, sequence_length, videos_folder, DB_path)
 
 
 # Path for exported data, numpy arrays
-DATA_PATH_O = os.path.join('test/MP_Data') 
+DATA_PATH_O = os.path.join('test1/MP_Data') 
 # Actions that we try to detect
-actions_O = np.array(['nice'])
+actions_O = np.array(['hello','nice','meet','you'])
 # Videos are going to be 30 frames in length
 sequence_length_O = 60
-videos_folder_O = "test/vidoes"
+videos_folder_O = "test1/videos"
 DB_path_O = 'MS-ASL/data.db'
 
 pipeline = Pipeline([
