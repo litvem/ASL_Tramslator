@@ -1,16 +1,37 @@
 from django.db import models
 import datetime
+
+# Customer
+class Customer(models.Model):
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    email = models.EmailField(max_length=100)
+    password = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f'{self.first_name} {self.last_name}'
     
-# Model training
+# User's translation history
+class Customer_history(models.Model):
+    translation_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    translation_name = models.CharField(max_length=100)
+    translation_date = models.DateField(default=datetime.datetime.today)
+    translation_file = models.FileField(upload_to="output/", null=True)
+
+    def __str__(self):
+        return self.translation_name
+
+# Training
 class Training(models.Model):
     modelid = models.AutoField(primary_key=True)
     trainingdate = models.DateField(default=datetime.datetime.today)
-    accuracy = models.DecimalField(max_digits=5, decimal_places=2)
-    modelweights = models.FileField(upload_to="media/models/", null=True)
-    isdeployed = models.BooleanField(default=False)
+    training_accuracy = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    testing_accuracy = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    model_weights = models.FileField(upload_to="models/", null=True)
+    is_deployed = models.BooleanField(default=False)
 
     class Meta:
-        ordering = ('-accuracy',)
+        ordering = ('-training_accuracy', '-testing_accuracy',)
 
     def __str__(self):
         return str(self.modelid)
