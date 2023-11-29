@@ -70,7 +70,8 @@ def training(request):
 
 # History of user's translations
 def translations(request):
-    return render(request, "translations.html", {})
+    translation_list = User_translations.objects.all()
+    return render(request, "translations.html", {'translation_list': translation_list})
 
 ###
 # Generate text file
@@ -102,7 +103,7 @@ mp_drawing = mp.solutions.drawing_utils # Drawing utilities
 actions = np.array(['hello', 'nice', 'meet', 'you'])
 
 # Load the model
-model = load('media/models/V_0.joblib')
+model = load('media/models/V_0_wtGgQyu.joblib')
 
 @gzip.gzip_page
 def live(request):

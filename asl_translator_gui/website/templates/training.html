@@ -27,7 +27,8 @@
                         <tr>
                             <th>Model ID</th>
                             <th>Date of training</th>
-                            <th>Accuracy</th>
+                            <th>Training accuracy</th>
+                            <th>Testing accuracy</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -41,9 +42,10 @@
                     <tbody>
                         {% for training in training_list %}
                         <tr>
-                            <td data-title='Model ID'> {{training.modelid}} </td>
-                            <td data-title='Date of training'> {{training.trainingdate}} </td>
-                            <td data-title="Accuracy"> {{training.accuracy}}% </td>
+                            <td data-title='Model ID'> {{ training.modelid }} </td>
+                            <td data-title='Date of training'> {{ training.trainingdate }} </td>
+                            <td data-title="Training accuracy"> {{ training.training_accuracy }}% </td>
+                            <td data-title="Testing accuracy"> {{ training.testing_accuracy }}% </td>
                             <td class='deploy'>
                                 <a class='btn btn-dark' href='#'>Deploy</a>
                             </td>

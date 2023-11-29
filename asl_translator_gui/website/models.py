@@ -1,19 +1,10 @@
 from django.db import models
+from django.conf import settings
 import datetime
 
-# Customer
-class Customer(models.Model):
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-    email = models.EmailField(max_length=100)
-    password = models.CharField(max_length=100)
-
-    def __str__(self):
-        return f'{self.first_name} {self.last_name}'
-    
-# User's translation history
-class Customer_history(models.Model):
-    translation_id = models.ForeignKey(Customer, on_delete=models.CASCADE)
+# User translation history
+class Translation(models.Model):
+    translation_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     translation_name = models.CharField(max_length=100)
     translation_date = models.DateField(default=datetime.datetime.today)
     translation_file = models.FileField(upload_to="output/", null=True)
