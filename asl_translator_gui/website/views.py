@@ -1,22 +1,39 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse
-from .models import *
-from django.views.decorators import gzip
-from django.http import StreamingHttpResponse
+import os
 import cv2
 import threading
-from joblib import load
 import numpy as np
 import mediapipe as mp
+from .models import *
+from .forms import SignUpForm
+from joblib import load
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
+from django.http import HttpResponse, StreamingHttpResponse
+from django.views.decorators import gzip
 
 # Home
 def home(request):
     return render(request, "home.html", {})
 
-# About
-def about(request):
-    return render(request, "about.html", {})
+# Register user
+def register_user(request):
+    form = SignUpForm()
+    # Check if the form was filled in
+    if request.method == "POST":
+        # Take input from the webpage and add to SignUpForm
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password1']
+            # Log in user
+            user = authenticate(username=username, password=password)
+            login(request, user)
+            return redirect("home")
+        else:
+            return redirect("register")
+    else:
+        return render(request, "register.html", {'form':form})
 
 # Login
 def login_user(request):
@@ -30,13 +47,16 @@ def login_user(request):
         # Login if the form was filled in
         if user is not None:
             login(request, user)
-            return redirect('training')
+            if user.is_superuser:
+                return redirect('training')
+            else:
+                return redirect('translations')
         # Redirect if login was not successful 
         else:
             return redirect('login')
     # If the form was not filled in, show the login page    
     else:
-        return render(request, "login.html", {})
+        return render(request, "login.html", {'navbar': 'login'})
 
 # Logout
 def logout_user(request):
@@ -48,11 +68,32 @@ def training(request):
     training_list = Training.objects.all()
     return render(request, "training.html", {'training_list': training_list})
 
+# History of user's translations
+def translations(request):
+    return render(request, "translations.html", {})
 
+###
+# Generate text file
+def translation(request):
+    file_path = "media/output/translation.txt"
+    file_name = os.path.basename(file_path)
+    #response = HttpResponse(content_type="text/plain")
+    #response["Content-Disposition"] = "attachment; filename=translation.txt"
 
+    #lines = ["This is line 1\n", "This is line 2\n", "This is line 3\n"]
+    # Write to text file
+    #response.writelines(lines)
+    #return response
+    response = HttpResponse(content_type="text/plain")
+    response["Content-Desposition"] = "attachment; filename=translation.txt"
+    return response
 
-
-
+# Download file
+def downloadtranslation(request):
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    filename = "translation.txt"
+    #filepath = base_dir + 
+###
 
 # Holistics for the drawing of keypoints
 mp_holistic = mp.solutions.holistic # Holistic model
@@ -61,15 +102,13 @@ mp_drawing = mp.solutions.drawing_utils # Drawing utilities
 actions = np.array(['hello', 'nice', 'meet', 'you'])
 
 # Load the model
-model = load('media/media/models/V_0.joblib')
-
-
+model = load('media/models/V_0.joblib')
 
 @gzip.gzip_page
 def live(request):
     try:
         cam = VideoCamera()
-        # calls the live video feed method and pass it to be rendered
+        # Call the live video feed method and pass it to be rendered
         return StreamingHttpResponse(gen(cam), content_type="multipart/x-mixed-replace;boundary=frame")
     except:
         pass
@@ -119,8 +158,7 @@ def draw_styled_landmarks(image, results):
                              ) 
 
 
-
-#to capture video class
+# Capture video class
 class VideoCamera(object):
     def __init__(self):
         self.video = cv2.VideoCapture(0)
@@ -148,7 +186,7 @@ def gen(camera):
     predictions = []        # what the model predicts
     threshold = 0.2         # how confident should the resulted prediction be so that we present/use it
 
-    # give the source of video- 0 for the camera and video path for uploaded videos
+    # give the source of video - 0 for the camera and video path for uploaded videos
     #cap = cv2.VideoCapture(0)
     # the tool we need for extracting keypoints and drawing
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
@@ -183,7 +221,7 @@ def gen(camera):
                     else:
                         sentence.append(actions[np.argmax(res)])
 
-            # only the last 5 words
+            # Limit to last 5 words
             if len(sentence) > 5: 
                 sentence = sentence[-5:]
 
@@ -199,4 +237,7 @@ def gen(camera):
             frame_bytes = buffer.tobytes()
             yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
-        
+
+            # Save detected words to a text file
+            with open('media/output/translation.txt', 'w') as file:
+                file.write(' '.join(sentence))        
