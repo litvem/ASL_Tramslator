@@ -1,15 +1,19 @@
-import os
-import cv2
-import threading
-import numpy as np
-import mediapipe as mp
-from .models import *
-from .forms import SignUpForm
-from joblib import load
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse, StreamingHttpResponse
+from django.http import HttpResponse
+from .models import *
 from django.views.decorators import gzip
+import cv2
+import threading
+from joblib import load
+import numpy as np
+import mediapipe as mp
+from joblib import dump, load
+import pipelines.Data_prepare_pipeline as prepareD
+import pipelines.training_pipeline as trainM
+import random
+from .forms import SignUpForm
+from django.http import HttpResponse, StreamingHttpResponse
 
 # Home
 def home(request):
@@ -65,8 +69,20 @@ def logout_user(request):
 
 # Model training
 def training(request):
+    data = prepareD.data_pipeline.fit_transform(None)
+    ##run some tests
+    data2 = data
+    result = trainM.train_pipeline.fit_transform(None)
+
+    trained_model = result['model']
+    accuracy = result['accuracy']
+    train_accuracy = result['train_accuracy']
+
+    dump(trained_model, 'asl_translator_gui/trained_models/{}.joblib'.format(random.randint(1000, 9999)))
+
     training_list = Training.objects.all()
     return render(request, "training.html", {'training_list': training_list})
+
 
 # History of user's translations
 def translations(request):
@@ -100,7 +116,11 @@ def downloadtranslation(request):
 mp_holistic = mp.solutions.holistic # Holistic model
 mp_drawing = mp.solutions.drawing_utils # Drawing utilities
 # The labels/words we can predict
-actions = np.array(['hello', 'nice', 'meet', 'you'])
+actions = np.array(['nice','teacher','eat','no','happy','like','orange','want','deaf','school','sister','finish','white',
+                      'what','tired','friend','sit','yes','student','spring','good','hello','mother','fish','again','learn',
+                      'sad','table','where','father','milk','paper','forget','cousin','brother','nothing','book','girl','fine',
+                      'black'])
+
 
 # Load the model
 model = load('media/models/V_0_wtGgQyu.joblib')
@@ -241,4 +261,4 @@ def gen(camera):
 
             # Save detected words to a text file
             with open('media/output/translation.txt', 'w') as file:
-                file.write(' '.join(sentence))        
+                file.write(' '.join(sentence))
