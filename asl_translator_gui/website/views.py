@@ -9,8 +9,8 @@ from joblib import load
 import numpy as np
 import mediapipe as mp
 from joblib import dump, load
-import pipelines.Data_prepare_pipeline as prepareD
-import pipelines.training_pipeline as trainM
+import pipelines.pipes.Data_prepare_pipeline as prepareD
+import pipelines.pipes.training_pipeline as trainM
 import random
 from .forms import SignUpForm
 from django.http import HttpResponse, StreamingHttpResponse
