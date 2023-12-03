@@ -20,11 +20,11 @@
             </div>
         </header>
         <div class="container">
-            <div class="row" id="frame">
+            <div class="row justify-content-center" id="frame">
                 <div class="col-6">
                     <form method="POST" action="{% url 'register' %}">
                         {% csrf_token %}
-                        {{ form.as_p }}
+                        {{ user_form.as_p }}
                         <center>
                             <button type="submit" class="btn btn-secondary">Register</button><br><br>
                         </center>
