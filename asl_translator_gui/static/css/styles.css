@@ -479,7 +479,7 @@ progress {
 }
 
 .fixed_header {
-  width: 750px;
+  width: 70%;
   table-layout: auto;
   border-collapse: collapse;
   margin-left: auto;
@@ -503,14 +503,14 @@ progress {
 .fixed_header td {
   padding: 5px;
   text-align: center;
-  width: 200px;
+  width: 70%;
 }
 .collapsible {
 background-color: black;
 color: #fff;
 cursor: pointer;
 padding: 18px;
-width: 750px;
+width: 70%;
 margin-left: auto;
 margin-right: auto;
 border: none;
@@ -10921,27 +10921,61 @@ html {
   min-height: 15rem;
 }
 
-#frame {
-  justify-content: center;
-  align-items: center;
+.container-upload {
+  text-align: center;
+  width: 100%;
+  min-height: 250px;
+  margin: auto;
+  background-color: #e9ecef;
+  display: none;
+  overflow: hidden;
 }
 
-.drag-area {
-  background: #dee2e6;
-  border: 2px dashed #212529;
-  height: 300px;
-  width: 700px;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
+.header-section {
+  padding: 20px 0px 0px 0px;
 }
 
-.drag-area .active {
-  border: 2px solid #212529;
+.header-section p {
+  margin: 5px;
 }
 
-.drag-area .icon {
-  padding-bottom: 10px;
+.cloud-icon img {
+  width: 100px;
+  height: 75px;
+  padding: 10px 0px 10px 0px;
+}
+
+.drop-section {
+  border: 1px dashed #343a40;
+  background-color: #adb5bd;
+  margin: 25px;
+  position: relative;
+  min-height: 200px;
+}
+
+.drop-section span {
+  display: block;
+  margin: auto;
+  margin-bottom: 10px;
+}
+
+.drop-section span, 
+.drop-section button {
+  display: block;
+  margin: auto;
+  margin-bottom: 10px;
+}
+
+.drop-section button {
+  color: white;
+  background-color: #343a40;
+  border: none;
+  outline: none;
+  padding: 7px 20px;
+  margin-top: auto;
+  cursor: pointer;
+}
+
+.drop-section input {
+  display: none;
 }

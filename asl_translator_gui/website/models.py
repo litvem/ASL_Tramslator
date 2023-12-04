@@ -1,16 +1,30 @@
 from django.db import models
 from django.conf import settings
 import datetime
+import os
 
-# User translation history
-class Translation(models.Model):
-    translation_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    translation_name = models.CharField(max_length=100)
-    translation_date = models.DateField(default=datetime.datetime.today)
-    translation_file = models.FileField(upload_to="output/", null=True)
+# User translation input
+class Translation_input(models.Model):
+    input_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    input_date = models.DateField(default=datetime.datetime.today)
+    input_file = models.FileField(upload_to="input/", null=True)
 
     def __str__(self):
-        return self.translation_name
+        return f'Translation_input - ID: {self.id}, User: {self.input_id.username}'
+    
+    def file_name(self):
+        return os.path.basename(self.input_file.name)
+    
+    
+# User translation output
+class Translation_output(models.Model):
+    output_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    output_sourse = models.ForeignKey(Translation_input, on_delete=models.CASCADE)
+    output_file = models.FileField(upload_to="output/", null=True)
+
+    def __str__(self):
+        return f'Translation_input - ID: {self.id}, User: {self.output_id.username}'
+    
 
 # Training
 class Training(models.Model):

@@ -1,19 +1,21 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse
-from .models import *
-from django.views.decorators import gzip
+import os
 import cv2
+import random
 import threading
-from joblib import load
 import numpy as np
 import mediapipe as mp
-from joblib import dump, load
 import pipelines.pipes.Data_prepare_pipeline as prepareD
 import pipelines.pipes.training_pipeline as trainM
-import random
-from .forms import SignUpForm
-from django.http import HttpResponse, StreamingHttpResponse
+from .models import *
+from .forms import *
+from joblib import dump, load
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from django.http import HttpResponse
+from django.views.decorators import gzip
 
 # Home
 def home(request):
@@ -21,23 +23,25 @@ def home(request):
 
 # Register user
 def register_user(request):
-    form = SignUpForm()
+    user_form = SignUpForm()
     # Check if the form was filled in
     if request.method == "POST":
         # Take input from the webpage and add to SignUpForm
-        form = SignUpForm(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password1']
+        user_form = SignUpForm(request.POST)
+        if user_form.is_valid():
+            user_form.save()
+            username = user_form.cleaned_data['username']
+            password = user_form.cleaned_data['password1']
             # Log in user
             user = authenticate(username=username, password=password)
             login(request, user)
+            messages.success(request, ("You have been registered successfully."))
             return redirect("home")
         else:
+            messages.success(request, ("There was an error. Please try to again."))
             return redirect("register")
     else:
-        return render(request, "register.html", {'form':form})
+        return render(request, "register.html", {'user_form':user_form})
 
 # Login
 def login_user(request):
@@ -51,12 +55,14 @@ def login_user(request):
         # Login if the form was filled in
         if user is not None:
             login(request, user)
+            messages.success(request, ("You have been logged in."))
             if user.is_superuser:
                 return redirect('training')
             else:
                 return redirect('translations')
         # Redirect if login was not successful 
         else:
+            messages.success(request, ("There was an error. Please try to again."))
             return redirect('login')
     # If the form was not filled in, show the login page    
     else:
@@ -65,6 +71,7 @@ def login_user(request):
 # Logout
 def logout_user(request):
     logout(request)
+    messages.success(request, ("You have been logged out."))
     return redirect('home')
 
 # Model training
@@ -86,24 +93,21 @@ def training(request):
 
 # History of user's translations
 def translations(request):
-    translation_list = User_translations.objects.all()
-    return render(request, "translations.html", {'translation_list': translation_list})
+    translation_list = Translation_input.objects.all()
+    # Upload file
+    upload_form = UploadForm()
+    if request.method == "POST":
+        upload_form = UploadForm(request.POST, request.FILES)
+        if upload_form.is_valid():
+            upload_form.save()
+    return render(request, "translations.html", {'translation_list': translation_list, 'upload_form':upload_form})
 
-###
-# Generate text file
-def translation(request):
-    file_path = "media/output/translation.txt"
-    file_name = os.path.basename(file_path)
-    #response = HttpResponse(content_type="text/plain")
-    #response["Content-Disposition"] = "attachment; filename=translation.txt"
-
-    #lines = ["This is line 1\n", "This is line 2\n", "This is line 3\n"]
-    # Write to text file
-    #response.writelines(lines)
-    #return response
-    response = HttpResponse(content_type="text/plain")
-    response["Content-Desposition"] = "attachment; filename=translation.txt"
-    return response
+# Upload file for translation
+#def upload_file(request):
+#    upload_form = UploadForm(request.POST, request.FILES)
+#    if upload_form.is_valid():
+#        upload_form.save()
+#    return render(request, "translations.html", {'upload_form':upload_form})
 
 # Download file
 def downloadtranslation(request):

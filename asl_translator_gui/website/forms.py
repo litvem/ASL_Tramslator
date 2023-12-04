@@ -1,4 +1,5 @@
 from django import forms
+from .models import *
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 
@@ -29,3 +30,11 @@ class SignUpForm(UserCreationForm):
         self.fields['password2'].widget.attrs['placeholder'] = 'Confirm Password'
         self.fields['password2'].label = ''
         self.fields['password2'].help_text = '<span class="form-text text-muted"><small>Enter the same password as before, for verification.</small></span>'
+
+# Upload video form
+class UploadForm(forms.ModelForm):
+    input_file = forms.FileField(label="Uploaded file")
+
+    class Meta:
+        model = Translation_input
+        fields = ('input_file', )
