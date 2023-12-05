@@ -117,7 +117,6 @@ def training(request):
             return render(request, "training.html", {'training_list': training_list, 'tr_upload_form':tr_upload_form, 'tr_error_messages':tr_error_messages})
     return render(request, "training.html", {'training_list': training_list, 'tr_upload_form':tr_upload_form})    
 
-
 # History of user's translations
 def translations(request):
     translation_list = Translation_input.objects.all()
@@ -154,9 +153,13 @@ mp_drawing = mp.solutions.drawing_utils # Drawing utilities
 actions = np.array(['nice'])
 
 
-# # Load the model
-# absolute_path = os.path.abspath("media/models/V_0_wtGgQyu.joblib")
-# model = load(absolute_path)
+# Load the model
+training_list = Training.objects.all()
+for training in training_list:
+    if (training.is_deployed):
+        deployed_model = training.model_weights
+absolute_path = os.path.abspath(deployed_model)
+model = load(absolute_path)
 
 @gzip.gzip_page
 def live(request):
