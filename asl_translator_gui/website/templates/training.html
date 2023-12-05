@@ -6,6 +6,91 @@
     <title>Model training</title>
 </head>
 
+<style>
+.container-table {
+  --bs-gutter-x: 1.5rem;
+  --bs-gutter-y: 0;
+  width: 750px;
+  padding-right: calc(var(--bs-gutter-x) * 0.5);
+  padding-left: calc(var(--bs-gutter-x) * 0.5);
+  margin-right: auto;
+  margin-left: auto;
+  margin-top: -40px;
+}
+
+.fixed_header {
+  width: 750px;
+  table-layout: auto;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: -40px;
+}
+.fixed_header tbody {
+  display: block;
+  width: 100%;
+  overflow: auto;
+  height: 190px;
+}
+.fixed_header thead tr {
+  display: block;
+}
+.fixed_header thead {
+  background: black;
+  color: #fff;
+}
+.fixed_header th,
+.fixed_header td {
+  padding: 5px;
+  text-align: center;
+  width: 200px;
+}
+.collapsible {
+background-color: black;
+color: #fff;
+cursor: pointer;
+padding: 18px;
+width: 750px;
+margin-left: auto;
+margin-right: auto;
+border: none;
+text-align: center;
+outline: none;
+font-size: 15px;
+}
+.active, .collapsible:hover {
+background-color: #424649;
+}
+.content {
+padding: 0 18px;
+display: none;
+overflow: hidden;
+background-color: #fff;
+}
+.table-sortable th {
+    cursor: pointer;
+}
+
+.table-sortable .th-sort-asc::after {
+    content: "\25b4";
+}
+
+.table-sortable .th-sort-desc::after {
+    content: "\25be";
+}
+
+.table-sortable .th-sort-asc::after,
+.table-sortable .th-sort-desc::after {
+    margin-left: 5px;
+}
+
+.table-sortable .th-sort-asc,
+.table-sortable .th-sort-desc {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+</style>
+
 <body class="d-flex flex-column">
     <main class="flex-shrink-0">
         <header class="py-5">
@@ -34,7 +119,7 @@
                     </thead>
                     <tfoot>
                         <tr>
-                        <th colspan='4'>
+                        <th colspan='5'>
                             <a data-toggle="collapse" class="collapse" href="#collapsableWindow">Re-train model</a>
                         </th>
                         </tr>
@@ -47,27 +132,31 @@
                             <td data-title="Training accuracy"> {{ training.training_accuracy }}% </td>
                             <td data-title="Testing accuracy"> {{ training.testing_accuracy }}% </td>
                             <td class='deploy'>
-                                <a class='btn btn-dark' href='#'>Deploy</a>
+                                {% if training.is_deployed %}
+                                    <a class='btn btn-dark' href='#'>Deploy</a>
+                                {% else %}
+                                    <a class='btn btn-success' href='#'>Deployed</a>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-                <form id="retrain-form" method="post" action="{% url 'training' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="collapsible">Retrain Model</button>
-                </form>
-                
+                <button type="submit" class="collapsible">Retrain Model</button>                
                 <div class="content">
                     <div class="upload_frame">
                         <label for="input-file" id="drop_area">
                             <input type="file" accept="mp4" id="input-file" hidden />
-                            <div id="img_view">
-                                <img src="{% static 'assets/upload.png' %}">
+                        <div id="img_view">
+                            <img src="{% static 'assets/upload.png' %}">
                                 <p>Drag and drop file here,<br>or<br><a href="#" id="file-browser">browse</a> your computer.</p>
-                            </div>
+                        </div>
                         </label>
                     </div>
+                    <form id="retrain-form" method="post" action="{% url 'training' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-dark">Retrain Model</button>
+                    </form>
                 </div> 
             </div>
         </div>
@@ -115,6 +204,6 @@
             // Add if needed
         }
     </script>
-    
+
 </body>
 {% endblock %}  
