@@ -53,7 +53,11 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                <button type="button" class="collapsible">Retrain Model</button>
+                <form id="retrain-form" method="post" action="{% url 'training' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="collapsible">Retrain Model</button>
+                </form>
+                
                 <div class="content">
                     <div class="upload_frame">
                         <label for="input-file" id="drop_area">
@@ -69,5 +73,52 @@
         </div>
     </main>
     <script src="{% static 'js/training_scripts.js'%}"></script>
+    <script>
+        document.getElementById('retrain-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            // Show "Retraining..." notification
+            showNotification('Retraining in progress...', 'info');
+
+            fetch(this.action, {
+                method: this.method,
+                body: new FormData(this),
+                headers: {
+                    'X-CSRFToken': document.getElementsByName('csrfmiddlewaretoken')[0].value
+                }
+            })
+            .then(response => response.text())
+            .then(result => {
+                // Hide the previous notification
+                hideNotification();
+
+                // Show success notification
+                showNotification('Retraining successful!', 'success');
+
+                // Handle the result as needed (update UI, display messages, etc.)
+                console.log('Result:', result);
+            })
+            .catch(error => {
+                // Hide the previous notification
+                hideNotification();
+
+                // Show error notification
+                showNotification('Error during retraining!', 'error');
+                console.error('Error:', error);
+            });
+        });
+
+        // Function to show a notification
+        function showNotification(message, type) {
+            // You can customize this function based on your notification library or implementation
+            alert(message);
+        }
+
+        // Function to hide the notification (if needed)
+        function hideNotification() {
+            // You can customize this function based on your notification library or implementation
+        }
+    </script>
+    
 </body>
 {% endblock %}  

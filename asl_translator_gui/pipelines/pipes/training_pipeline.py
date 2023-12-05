@@ -13,12 +13,13 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from joblib import dump, load
 
 #path to our np arrays
-DATA_PATH = os.path.join('../data/MP_Data') 
+DATA_PATH = os.path.join(os.path.abspath('data/MP_Data')) 
 #list of all our labels
-actions = ['nice','teacher','eat','no','happy','like','orange','want','deaf','school','sister','finish','white',
-                      'what','tired','friend','sit','yes','student','spring','good','hello','mother','fish','again','learn',
-                      'sad','table','where','father','milk','paper','forget','cousin','brother','nothing','book','girl','fine',
-                      'black']
+# actions = ['nice','teacher','eat','no','happy','like','orange','want','deaf','school','sister','finish','white',
+#                       'what','tired','friend','sit','yes','student','spring','good','hello','mother','fish','again','learn',
+#                       'sad','table','where','father','milk','paper','forget','cousin','brother','nothing','book','girl','fine',
+#                       'black']
+actions = np.array(['nice'])
 
 
 #class for the model trainer
@@ -43,7 +44,7 @@ class TrainModelTransformer(BaseEstimator, TransformerMixin):
         sequences, labels = [], []
         #for all the actions and all their videos (folders of np arrays)
         for action in self.actions:
-            videos = os.listdir("../data/MP_Data" + "/" + "{}".format(action))
+            videos = os.listdir(os.path.abspath("data/MP_Data") + "/" + "{}".format(action))
             if ".DS_Store" in videos:
                 videos.remove(".DS_Store")
             #pick 38 random videos for each action
@@ -53,7 +54,7 @@ class TrainModelTransformer(BaseEstimator, TransformerMixin):
                 window = []
                 if sequence != ".DS_Store":
                     #count the number of np arrays (frames) this video has
-                    number_of_f = os.listdir("../data/MP_Data" + "/" + "{}".format(action) + "/" + sequence)
+                    number_of_f = os.listdir(os.path.abspath("data/MP_Data") + "/" + "{}".format(action) + "/" + sequence)
                     f_size = len(number_of_f)
 
                     #if the number of frames is smaller/equal 29, get all the 29 frames and add them to the windows list

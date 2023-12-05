@@ -100,7 +100,7 @@ def save_videos(data_point, videos_address, sequence_length, np_address, video_i
         except youtube_dl.DownloadError as e:
             print("Error during download:", e)
     # crop video
-    subprocess.call(['C:/Users/yasi7/anaconda3/pkgs/ffmpeg-4.3.1-ha925a31_0/Library/bin/ffmpeg.exe', '-y', '-i',
+    subprocess.run(['C:/Users/yasi7/anaconda3/pkgs/ffmpeg-4.3.1-ha925a31_0/Library/bin/ffmpeg.exe', '-y', '-i',
                      dir_name + "/" + "current" + ".mp4",
                      '-ss', str(start_time), '-t', str(end_time - start_time), file_name])
 
@@ -157,8 +157,8 @@ def prepare_data(X, DATA_PATH, actions, sequence_length, videos_folder, DB_path)
         print(len(parsed_data_json))
 
     #create a folder for our data
-    if not os.path.exists("asl_translator_gui/data"):
-        os.makedirs("asl_translator_gui/data")
+    if not os.path.exists(os.path.abspath("data")):
+        os.makedirs(os.path.abspath("ASL-translator/asl_translator_gui") + "/data")
     #create a root directory for our videos
     if not os.path.exists(videos_folder):
         os.makedirs(videos_folder)
@@ -190,18 +190,20 @@ def prepare_data(X, DATA_PATH, actions, sequence_length, videos_folder, DB_path)
 
 
 # Path for exported data, numpy arrays
-DATA_PATH_O = os.path.join('asl_translator_gui/data/MP_Data') 
+DATA_PATH_O = os.path.join(os.path.abspath("data/MP_Data")) 
 # Actions that we try to detect
-actions_O = np.array(['nice','teacher','eat','no','happy','like','orange','want','deaf','school','sister','finish','white',
-                      'what','tired','friend','sit','yes','student','spring','good','hello','mother','fish','again','learn',
-                      'sad','table','where','father','milk','paper','forget','cousin','brother','nothing','book','girl','fine',
-                      'black'])
+# actions_O = np.array(['nice','teacher','eat','no','happy','like','orange','want','deaf','school','sister','finish','white',
+#                       'what','tired','friend','sit','yes','student','spring','good','hello','mother','fish','again','learn',
+#                       'sad','table','where','father','milk','paper','forget','cousin','brother','nothing','book','girl','fine',
+#                       'black'])
+
+actions_O = np.array(['nice'])
 # Videos are going to be 60 frames in length
 sequence_length_O = 60
 #path were the actual mp4 videos get stored and then deleted
-videos_folder_O = "asl_translator_gui/data/videos"
+videos_folder_O = os.path.abspath("data")
 #path to the db were we hold the json to db formated data 
-DB_path_O = 'asl_translator_gui/data/data.db'
+DB_path_O = os.path.abspath('data/data.db')
 
 #create the pipeline given the argument
 data_pipeline = Pipeline([
@@ -210,4 +212,4 @@ data_pipeline = Pipeline([
 ])
 
 #runs the pipeline ****ffor testing, comment later*****
-#X_transformed = data_pipeline.fit_transform(None)
+# X_transformed = data_pipeline.fit_transform(None)

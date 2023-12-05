@@ -74,8 +74,7 @@ def logout_user(request):
     messages.success(request, ("You have been logged out."))
     return redirect('home')
 
-# Model training
-def training(request):
+def training_functionality():
     data = prepareD.data_pipeline.fit_transform(None)
     ##run some tests
     data2 = data
@@ -84,11 +83,21 @@ def training(request):
     trained_model = result['model']
     accuracy = result['accuracy']
     train_accuracy = result['train_accuracy']
+    abs_path = os.path.abspath('trained_models')
+    # dump(trained_model, '{abs_path}{}.joblib'.format(random.randint(1000, 9999)))
+    dump(trained_model, f'{abs_path}/{random.randint(1000, 9999)}.joblib')
 
-    dump(trained_model, 'asl_translator_gui/trained_models/{}.joblib'.format(random.randint(1000, 9999)))
-
+# Model training
+def training(request):
+    # training_list = Training.objects.all()
+    # return render(request, "training.html", {'training_list': training_list})
+    if request.method == 'POST':
+        # Handle the retraining logic when the form is submitted
+        result = training_functionality()
+        return HttpResponse(result)
     training_list = Training.objects.all()
-    return render(request, "training.html", {'training_list': training_list})
+    context = {'training_list': training_list}
+    return render(request, "training.html", context)
 
 
 # History of user's translations
@@ -120,14 +129,16 @@ def downloadtranslation(request):
 mp_holistic = mp.solutions.holistic # Holistic model
 mp_drawing = mp.solutions.drawing_utils # Drawing utilities
 # The labels/words we can predict
-actions = np.array(['nice','teacher','eat','no','happy','like','orange','want','deaf','school','sister','finish','white',
-                      'what','tired','friend','sit','yes','student','spring','good','hello','mother','fish','again','learn',
-                      'sad','table','where','father','milk','paper','forget','cousin','brother','nothing','book','girl','fine',
-                      'black'])
+# actions = np.array(['nice','teacher','eat','no','happy','like','orange','want','deaf','school','sister','finish','white',
+#                       'what','tired','friend','sit','yes','student','spring','good','hello','mother','fish','again','learn',
+#                       'sad','table','where','father','milk','paper','forget','cousin','brother','nothing','book','girl','fine',
+#                       'black'])
+actions = np.array(['nice'])
 
 
-# Load the model
-model = load('media/models/V_0_wtGgQyu.joblib')
+# # Load the model
+# absolute_path = os.path.abspath("media/models/V_0_wtGgQyu.joblib")
+# model = load(absolute_path)
 
 @gzip.gzip_page
 def live(request):
