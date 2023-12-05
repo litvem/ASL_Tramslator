@@ -92,10 +92,9 @@
                 // Hide the previous notification
                 hideNotification();
 
-                // Show success notification
+                // Show success 
                 showNotification('Retraining successful!', 'success');
 
-                // Handle the result as needed (update UI, display messages, etc.)
                 console.log('Result:', result);
             })
             .catch(error => {
@@ -108,15 +107,12 @@
             });
         });
 
-        // Function to show a notification
         function showNotification(message, type) {
-            // You can customize this function based on your notification library or implementation
             alert(message);
         }
 
-        // Function to hide the notification (if needed)
         function hideNotification() {
-            // You can customize this function based on your notification library or implementation
+            // Add if needed
         }
     </script>
     
