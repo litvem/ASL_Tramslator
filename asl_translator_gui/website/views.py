@@ -10,16 +10,18 @@ from .models import *
 from .forms import *
 from joblib import dump, load
 
+from django.core.files.storage import FileSystemStorage
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.http import HttpResponse
+from django.http import StreamingHttpResponse
 from django.views.decorators import gzip
 
 # Home
 def home(request):
     return render(request, "home.html", {})
+
 
 # Register user
 def register_user(request):
@@ -42,6 +44,7 @@ def register_user(request):
             return redirect("register")
     else:
         return render(request, "register.html", {'user_form':user_form})
+
 
 # Login
 def login_user(request):
@@ -67,6 +70,7 @@ def login_user(request):
     # If the form was not filled in, show the login page    
     else:
         return render(request, "login.html", {'navbar': 'login'})
+
 
 # Logout
 def logout_user(request):
@@ -108,15 +112,14 @@ def translations(request):
     if request.method == "POST":
         upload_form = UploadForm(request.POST, request.FILES)
         if upload_form.is_valid():
-            upload_form.save()
+            instance = upload_form.save(commit=False)
+            instance.input_id = request.user    # Assign upload file with currently logged in user
+            instance.save()
+        else:
+            print(upload_form.errors)
+            upload_form = UploadForm()
     return render(request, "translations.html", {'translation_list': translation_list, 'upload_form':upload_form})
 
-# Upload file for translation
-#def upload_file(request):
-#    upload_form = UploadForm(request.POST, request.FILES)
-#    if upload_form.is_valid():
-#        upload_form.save()
-#    return render(request, "translations.html", {'upload_form':upload_form})
 
 # Download file
 def downloadtranslation(request):
@@ -124,6 +127,7 @@ def downloadtranslation(request):
     filename = "translation.txt"
     #filepath = base_dir + 
 ###
+
 
 # Holistics for the drawing of keypoints
 mp_holistic = mp.solutions.holistic # Holistic model

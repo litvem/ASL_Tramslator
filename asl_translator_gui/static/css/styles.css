@@ -10940,9 +10940,9 @@ html {
 }
 
 .cloud-icon img {
-  width: 100px;
-  height: 75px;
-  padding: 10px 0px 10px 0px;
+  width: 13%;
+  height: 13%;
+  padding: 20px 0px 20px 0px;
 }
 
 .drop-section {
@@ -10950,7 +10950,6 @@ html {
   background-color: #adb5bd;
   margin: 25px;
   position: relative;
-  min-height: 200px;
 }
 
 .drop-section span {
@@ -10976,6 +10975,33 @@ html {
   cursor: pointer;
 }
 
-.drop-section input {
-  display: none;
+.custom-button {
+  background-color: black;
+  color: #fff;
+  cursor: pointer;
+  padding: 7px 15px 7px 15px;
+  border: none;
+  text-align: center;
+  outline: none;
+  font-size: 15px;
+}
+  
+.custom-button:hover {
+  background-color: #424649;
+}
+
+#upload-button {
+  display: block ;
+  background-color: black;
+  color: #fff;
+  cursor: pointer;
+  padding: 7px 15px 7px 15px;
+  border: none;
+  text-align: center;
+  outline: none;
+  font-size: 15px;
+}
+
+#upload-button:hover {
+  background-color: #424649;
 }

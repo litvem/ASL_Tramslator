@@ -33,8 +33,6 @@ class SignUpForm(UserCreationForm):
 
 # Upload video form
 class UploadForm(forms.ModelForm):
-    input_file = forms.FileField(label="Uploaded file")
-
     class Meta:
         model = Translation_input
         fields = ('input_file', )

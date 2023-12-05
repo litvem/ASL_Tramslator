@@ -20,6 +20,7 @@
                 </div>
             </div>
         </header>
+        
         <div class="container-table">
             <div class="row">
                 <table class="table">
@@ -38,7 +39,7 @@
                             <td data-title='Name of translated file'> {{ translation.file_name }} </td>
                             <td data-title='Date of translation'> {{ translation.input_date }} </td>
                             <td style="text-align: center;">
-                                <button class='btn btn-secondary'>Download translation</button>
+                                <button class='custom-button'>Download</button>
                             </td>
                         </tr>
                         {% endfor %}
@@ -54,32 +55,17 @@
                 </table>
                 <button type="btn btn-secondary" class="collapsible">New translation</button>
                 <div class="container-upload">
-                    <!-- Header of drop area -->
                     <div class="header-section">
                         <p>Upload file you want to translate<br>Only <strong>MP4</strong> files not exceeding <strong>100MB</strong> are allowed</p>
                     </div>
-                    <!-- Drop area -->
-                    <div class="drop-section" ondrop="handleDrop(event)" ondragover="handleDragOver(event)">
+                    <form method="POST" enctype="multipart/form-data" id="uploadForm" class="drop-section">
+                        {% csrf_token %}
                         <div class="cloud-icon">
                             <img src="{% static 'assets/upload_icon.png' %}" alt="cloud">
                         </div>
-                        <span>Drag and drop your file here</span>
-                        <span>OR</span>
-                        <button class="file-selector">Browse files</button>
-                        <input type="file" class="file-selector-input">
-                        <!--form method="POST" action="{% url 'translations' %}" enctype="multipart/form-data">
-                            {% csrf_token %}
-                            {{ upload_form.as_p }}
-                            <center>
-                                <button type="submit" class="btn btn-secondary">Translate</button><br><br>
-                            </center>
-                        </form-->
-                        <form method="POST" enctype="multipart/form-data" id="upload-form">
-                            {% csrf_token %}
-                            {{ upload_form.as_p }}
-                            <button type="submit">Upload</button>
-                        </form>
-                    </div>
+                        {{ upload_form.as_p }}
+                        <button id="upload-button">Upload</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -101,7 +87,27 @@
                 </div>
             </div>
         </div>
+        <!-- Error modal -->
+        <div class="modal fade" id="error-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h5 class="modal-title">Error</h5>
+                        <div class="error-messages">
+                            {% if upload_form.errors %}
+                                {% for field, error_list in upload_form.errors.items %}
+                                    {% for error in error_list %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
-    <script src="{% static 'js/translation_scripts.js' %}"></script>
+    <script src="{% static 'js/translation_scripts.js' %}" defer></script>
 </body>
 {% endblock %}
