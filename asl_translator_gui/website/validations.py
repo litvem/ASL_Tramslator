@@ -1,7 +1,9 @@
 from django.core.exceptions import ValidationError
 
+valid_file_format = ['.mp4']
+
 def validate_file_format(value):
-    if not value.endswith('.mp4'):
+    if not value.name.lower().endswith(tuple(valid_file_format)):
         raise ValidationError("File must be in MP4 format.")
 
 
