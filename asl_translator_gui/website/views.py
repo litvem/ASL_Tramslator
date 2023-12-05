@@ -18,6 +18,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse, StreamingHttpResponse
 from django.views.decorators import gzip
 
+
 # Home
 def home(request):
     return render(request, "home.html", {})
@@ -78,6 +79,8 @@ def logout_user(request):
     messages.success(request, ("You have been logged out."))
     return redirect('home')
 
+
+# Retraining functionality
 def training_functionality():
     data = prepareD.data_pipeline.fit_transform(None)
     ##run some tests
@@ -90,6 +93,7 @@ def training_functionality():
     abs_path = os.path.abspath('trained_models')
     # dump(trained_model, '{abs_path}{}.joblib'.format(random.randint(1000, 9999)))
     dump(trained_model, f'{abs_path}/{random.randint(1000, 9999)}.joblib')
+
 
 # Model training
 def training(request):
@@ -116,8 +120,8 @@ def translations(request):
             instance.input_id = request.user    # Assign upload file with currently logged in user
             instance.save()
         else:
-            print(upload_form.errors)
-            upload_form = UploadForm()
+            error_messages = upload_form.errors.values()
+            return render(request, "translations.html", {'translation_list': translation_list, 'upload_form':upload_form, 'error_messages':error_messages})
     return render(request, "translations.html", {'translation_list': translation_list, 'upload_form':upload_form})
 
 

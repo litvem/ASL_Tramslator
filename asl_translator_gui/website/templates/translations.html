@@ -8,6 +8,19 @@
 </head>
 
 <body class="d-flex flex-column">
+
+    {% if error_messages %}
+    <div class="container">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error!</strong> The following issue(s) occurred:
+                {% for error_message in error_messages %}
+                    {{ error_message }}
+                {% endfor %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+    {% endif %}
+
     <main class="flex-shrink-0">
         <header class="py-5">
             <div class="container px-5">
@@ -75,15 +88,6 @@
                 <div class="modal-body">
                     <button type="button" class="btn-close" data-bs-dismiss="modal" area-label="Close"></button>
                     <p>Your file has been translated successfully and transcript is available for download.</p>
-                </div>
-            </div>
-        </div>
-        <!-- File error modal/popup -->
-        <div class="modal fade" id="error-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" area-hidden="true">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" area-label="Close"></button>
-                    <p>Uploading file is not MP4 format and/or bigger that 100MB. Try again.</p>
                 </div>
             </div>
         </div>
