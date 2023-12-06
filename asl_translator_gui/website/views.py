@@ -21,15 +21,6 @@ from django.views.decorators import gzip
 
 # Home
 def home(request):
-    
-    # Load the model
-    training_list = Training.objects.all()
-    for training in training_list:
-        if (training.is_deployed):
-            deployed_model = training.model_weights
-            absolute_path = os.path.abspath(deployed_model)
-            model = load(absolute_path)
-            
     return render(request, "home.html", {})
 
 
@@ -174,6 +165,14 @@ def live(request):
     return render(request, 'live.html')
 
 def mediapipe_detection(image, model):
+    # Load the model
+    training_list = Training.objects.all()
+    for training in training_list:
+        if (training.is_deployed):
+            deployed_model = training.model_weights
+            absolute_path = os.path.abspath(deployed_model)
+            model = load(absolute_path)
+
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # COLOR CONVERSION BGR 2 RGB
     image.flags.writeable = False                  # Image is no longer writeable
     results = model.process(image)                 # Make prediction
@@ -239,6 +238,14 @@ class VideoCamera(object):
 
 
 def gen(camera):
+    # Load the model
+    training_list = Training.objects.all()
+    for training in training_list:
+        if (training.is_deployed):
+            deployed_model = training.model_weights
+            absolute_path = os.path.abspath(deployed_model)
+            model = load(absolute_path)
+
     # 1. New detection variables
     sequence = []           # placeholder for 29 frames which makes up a video/sequence
     sentence = []           # the tranlation result
