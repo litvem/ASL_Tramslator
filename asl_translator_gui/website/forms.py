@@ -44,3 +44,5 @@ class UploadTrainingForm(forms.ModelForm):
     class Meta:
         model = Training_input
         fields = ('tr_input_file', )
+    
+    tr_input_file = forms.FileField(label='Upload file')

@@ -479,7 +479,7 @@ progress {
 }
 
 .fixed_header {
-  width: 70%;
+  width: 100%;
   table-layout: auto;
   border-collapse: collapse;
   margin-left: auto;
@@ -487,13 +487,13 @@ progress {
   margin-top: -40px;
 }
 .fixed_header tbody {
-  display: block;
+  /*display: block;*/
   width: 100%;
   overflow: auto;
   height: 190px;
 }
 .fixed_header thead tr {
-  display: block;
+  /*display: block;*/
 }
 .fixed_header thead {
   background: black;
@@ -503,7 +503,8 @@ progress {
 .fixed_header td {
   padding: 5px;
   text-align: center;
-  width: 70%;
+  width: 20%;
+  box-sizing: border-box;
 }
 .collapsible {
 background-color: black;
@@ -707,7 +708,7 @@ background-color: #fff;
 .container-table {
   --bs-gutter-x: 1.5rem;
   --bs-gutter-y: 0;
-  width: 750px;
+  width: 80%;
   padding-right: calc(var(--bs-gutter-x) * 0.5);
   padding-left: calc(var(--bs-gutter-x) * 0.5);
   margin-right: auto;
@@ -10940,8 +10941,8 @@ html {
 }
 
 .cloud-icon img {
-  width: 13%;
-  height: 13%;
+  width: 100px;
+  height: 100px;
   padding: 20px 0px 20px 0px;
 }
 
@@ -11004,4 +11005,8 @@ html {
 
 #upload-button:hover {
   background-color: #424649;
+}
+
+.render-form .ul {
+  display: none;
 }

@@ -1,4 +1,4 @@
-var coll = document.getElementsByClassName("collapsibleWindow");
+var coll = document.getElementsByClassName("collapsible");
 var i;
 
 for (i = 0; i < coll.length; i++) {
@@ -57,7 +57,7 @@ document.querySelectorAll(".table-sortable th").forEach(headerCell => {
 	});
 });
 
-/* Source: https://codepen.io/hbuchel/pen/jOGbGE */
+/* Source: https://codepen.io/hbuchel/pen/jOGbGE
 $('.button, .close').on('click', function(e) {
     e.preventDefault();
     $('.detail, html, body').toggleClass('open');
@@ -102,4 +102,4 @@ function showNotification(message, type) {
 
 function hideNotification() {
 	// Add if needed
-}
+}*/
