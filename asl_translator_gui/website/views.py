@@ -21,6 +21,15 @@ from django.views.decorators import gzip
 
 # Home
 def home(request):
+    
+    # Load the model
+    training_list = Training.objects.all()
+    for training in training_list:
+        if (training.is_deployed):
+            deployed_model = training.model_weights
+            absolute_path = os.path.abspath(deployed_model)
+            model = load(absolute_path)
+            
     return render(request, "home.html", {})
 
 
@@ -153,13 +162,6 @@ mp_drawing = mp.solutions.drawing_utils # Drawing utilities
 actions = np.array(['nice'])
 
 
-# Load the model
-training_list = Training.objects.all()
-for training in training_list:
-    if (training.is_deployed):
-        deployed_model = training.model_weights
-absolute_path = os.path.abspath(deployed_model)
-model = load(absolute_path)
 
 @gzip.gzip_page
 def live(request):
