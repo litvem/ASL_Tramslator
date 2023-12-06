@@ -24,6 +24,11 @@ def home(request):
     return render(request, "home.html", {})
 
 
+# Explanation
+def project_explanation(request):
+    return render(request, "explanation.html", {})
+
+
 # Register user
 def register_user(request):
     user_form = SignUpForm()
