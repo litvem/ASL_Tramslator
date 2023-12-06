@@ -31,8 +31,16 @@ class SignUpForm(UserCreationForm):
         self.fields['password2'].label = ''
         self.fields['password2'].help_text = '<span class="form-text text-muted"><small>Enter the same password as before, for verification.</small></span>'
 
+
 # Upload video form
 class UploadForm(forms.ModelForm):
     class Meta:
         model = Translation_input
         fields = ('input_file', )
+
+
+# Upload file for training form
+class UploadTrainingForm(forms.ModelForm):
+    class Meta:
+        model = Training_input
+        fields = ('tr_input_file', )
