@@ -97,15 +97,20 @@ def training_functionality():
 
 # Model training
 def training(request):
-    # training_list = Training.objects.all()
-    # return render(request, "training.html", {'training_list': training_list})
-    if request.method == 'POST':
-        # Handle the retraining logic when the form is submitted
-        result = training_functionality()
-        return HttpResponse(result)
     training_list = Training.objects.all()
-    context = {'training_list': training_list}
-    return render(request, "training.html", context)
+    tr_upload_form = UploadTrainingForm()
+    if request.method == 'POST':
+        tr_upload_form = UploadTrainingForm(request.POST, request.FILES)
+        if tr_upload_form.is_valid():
+            instance = tr_upload_form.save(commit=False)
+            instance.input_id = request.user    # Assign upload file with currently logged in user
+            instance.save()
+            # result = training_functionality()
+            # return HttpResponse(result)
+        else:
+            tr_error_messages = tr_upload_form.errors.values()
+            return render(request, "training.html", {'training_list': training_list, 'tr_upload_form':tr_upload_form, 'tr_error_messages':tr_error_messages})
+    return render(request, "training.html", {'training_list': training_list, 'tr_upload_form':tr_upload_form})    
 
 
 # History of user's translations
