@@ -17,6 +17,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.http import HttpResponse, StreamingHttpResponse
 from django.views.decorators import gzip
+from django.core.files.base import ContentFile
 
 
 # Home
@@ -103,7 +104,6 @@ def training_functionality():
 # Model training
 def training(request):
     training_list = Training.objects.all()
-<<<<<<< HEAD
     tr_upload_form = UploadTrainingForm()
     if request.method == 'POST':
         tr_upload_form = UploadTrainingForm(request.POST, request.FILES)
@@ -117,10 +117,6 @@ def training(request):
             tr_error_messages = tr_upload_form.errors.values()
             return render(request, "training.html", {'training_list': training_list, 'tr_upload_form':tr_upload_form, 'tr_error_messages':tr_error_messages})
     return render(request, "training.html", {'training_list': training_list, 'tr_upload_form':tr_upload_form})    
-=======
-    context = {'training_list': training_list}
-    return render(request, "training.html", context)
->>>>>>> cab74587835bbba2ba1520ad7c8d98d1ed07c82b
 
 # History of user's translations
 def translations(request):
@@ -143,7 +139,10 @@ def translations(request):
 def translateFile(input_id):
     input = Translation_input.objects.create(input_id = input_id)
     input_file = input.input_file
-
+    output = Translation_output(output_id = input_id, output_source = input_id, output_file = ContentFile(''))
+    output.save()
+    output_file = output.output_file
+    gen(input_file, output_file)
 
 # Download file
 def downloadtranslation(request):
@@ -151,7 +150,6 @@ def downloadtranslation(request):
     filename = "translation.txt"
     #filepath = base_dir + 
 ###
-
 
 # Holistics for the drawing of keypoints
 mp_holistic = mp.solutions.holistic # Holistic model
@@ -162,8 +160,6 @@ mp_drawing = mp.solutions.drawing_utils # Drawing utilities
 #                       'sad','table','where','father','milk','paper','forget','cousin','brother','nothing','book','girl','fine',
 #                       'black'])
 actions = np.array(['nice'])
-
-
 
 @gzip.gzip_page
 def live(request):
@@ -248,11 +244,7 @@ class VideoCamera(object):
             (self.grabbed, self.frame) = self.video.read()
 
 
-<<<<<<< HEAD
 def gen(camera, output_file = 'media/output/translation.txt'):
-=======
-def gen(camera):
->>>>>>> cab74587835bbba2ba1520ad7c8d98d1ed07c82b
     # Load the model
     training_list = Training.objects.all()
     for training in training_list:
