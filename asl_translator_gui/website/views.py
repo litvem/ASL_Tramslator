@@ -246,12 +246,10 @@ class VideoCamera(object):
 
 def gen(camera, output_file = 'media/output/translation.txt'):
     # Load the model
-    training_list = Training.objects.all()
-    for training in training_list:
-        if (training.is_deployed):
-            deployed_model = training.model_weights
-            absolute_path = os.path.abspath(deployed_model)
-            model = load(absolute_path)
+    training = Training.objects.create(is_deployed = "True")
+    deployed_model = training.model_weights
+    absolute_path = os.path.abspath(deployed_model)
+    model = load(absolute_path)
 
     # 1. New detection variables
     sequence = []           # placeholder for 29 frames which makes up a video/sequence
