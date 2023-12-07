@@ -120,8 +120,9 @@ def training(request):
 
 # History of user's translations
 def translations(request):
-    #TODO make this only get the translations for the currently logged in user, rather than all that are in the database.
-    translation_list = Translation_input.objects.all()
+    # Get translations for the current user
+    current_user = request.user
+    translation_list = Translation_input.objects.get(input_id = current_user.id)
     # Upload file
     upload_form = UploadForm()
     if request.method == "POST":
@@ -222,7 +223,6 @@ def draw_styled_landmarks(image, results):
                              mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2)
                              ) 
 
-
 # Capture video class
 class VideoCamera(object):
     def __init__(self):
@@ -242,7 +242,6 @@ class VideoCamera(object):
     def update(self):
         while True:
             (self.grabbed, self.frame) = self.video.read()
-
 
 def gen(camera, output_file = 'media/output/translation.txt'):
     # Load the model
