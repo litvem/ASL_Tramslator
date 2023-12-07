@@ -100,5 +100,9 @@ function showNotification(message, type) {
 
 function hideNotification() {
     // Add if needed
+<<<<<<< HEAD
 }
 */
+=======
+}
+>>>>>>> cab74587835bbba2ba1520ad7c8d98d1ed07c82b
