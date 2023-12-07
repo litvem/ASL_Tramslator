@@ -119,6 +119,7 @@ def training(request):
 
 # History of user's translations
 def translations(request):
+    #TODO make this only get the translations for the currently logged in user, rather than all that are in the database.
     translation_list = Translation_input.objects.all()
     # Upload file
     upload_form = UploadForm()
@@ -132,6 +133,11 @@ def translations(request):
             error_messages = upload_form.errors.values()
             return render(request, "translations.html", {'translation_list': translation_list, 'upload_form':upload_form, 'error_messages':error_messages})
     return render(request, "translations.html", {'translation_list': translation_list, 'upload_form':upload_form})
+
+# Translate file
+def translateFile(input_id):
+    input = Translation_input.objects.create(input_id = input_id)
+    input_file = input.input_file
 
 
 # Download file
@@ -237,7 +243,7 @@ class VideoCamera(object):
             (self.grabbed, self.frame) = self.video.read()
 
 
-def gen(camera):
+def gen(camera, output_file = 'media/output/translation.txt'):
     # Load the model
     training_list = Training.objects.all()
     for training in training_list:
@@ -305,5 +311,5 @@ def gen(camera):
                 b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
 
             # Save detected words to a text file
-            with open('media/output/translation.txt', 'w') as file:
+            with open(output_file, 'w') as file:
                 file.write(' '.join(sentence))

@@ -101,3 +101,4 @@ function showNotification(message, type) {
 function hideNotification() {
     // Add if needed
 }
+*/
