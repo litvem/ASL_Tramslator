@@ -17,6 +17,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.http import HttpResponse, StreamingHttpResponse
 from django.views.decorators import gzip
+from django.core.files.base import ContentFile
 
 
 # Home
@@ -99,7 +100,6 @@ def training_functionality():
     # dump(trained_model, '{abs_path}{}.joblib'.format(random.randint(1000, 9999)))
     dump(trained_model, f'{abs_path}/{random.randint(1000, 9999)}.joblib')
 
-
 # Model training
 def training(request):
     training_list = Training.objects.all()
@@ -117,9 +117,11 @@ def training(request):
             return render(request, "training.html", {'training_list': training_list, 'tr_upload_form':tr_upload_form, 'tr_error_messages':tr_error_messages})
     return render(request, "training.html", {'training_list': training_list, 'tr_upload_form':tr_upload_form})    
 
-
 # History of user's translations
 def translations(request):
+    # Get translations for the current user
+    current_user = request.user
+    #translation_list = Translation_input.objects.get(input_id = current_user.id)
     translation_list = Translation_input.objects.all()
     # Upload file
     upload_form = UploadForm()
@@ -134,6 +136,14 @@ def translations(request):
             return render(request, "translations.html", {'translation_list': translation_list, 'upload_form':upload_form, 'error_messages':error_messages})
     return render(request, "translations.html", {'translation_list': translation_list, 'upload_form':upload_form})
 
+# Translate file
+def translateFile(input_id):
+    input = Translation_input.objects.create(input_id = input_id)
+    input_file = input.input_file
+    output = Translation_output(output_id = input_id, output_source = input_id, output_file = ContentFile(''))
+    output.save()
+    output_file = output.output_file
+    gen(input_file, output_file)
 
 # Download file
 def downloadtranslation(request):
@@ -141,7 +151,6 @@ def downloadtranslation(request):
     filename = "translation.txt"
     #filepath = base_dir + 
 ###
-
 
 # Holistics for the drawing of keypoints
 mp_holistic = mp.solutions.holistic # Holistic model
@@ -152,11 +161,6 @@ mp_drawing = mp.solutions.drawing_utils # Drawing utilities
 #                       'sad','table','where','father','milk','paper','forget','cousin','brother','nothing','book','girl','fine',
 #                       'black'])
 actions = np.array(['nice'])
-
-
-# # Load the model
-# absolute_path = os.path.abspath("media/models/V_0_wtGgQyu.joblib")
-# model = load(absolute_path)
 
 @gzip.gzip_page
 def live(request):
@@ -169,6 +173,14 @@ def live(request):
     return render(request, 'live.html')
 
 def mediapipe_detection(image, model):
+    # Load the model
+    training_list = Training.objects.all()
+    for training in training_list:
+        if (training.is_deployed):
+            deployed_model = training.model_weights
+            absolute_path = os.path.abspath(deployed_model)
+            model = load(absolute_path)
+
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # COLOR CONVERSION BGR 2 RGB
     image.flags.writeable = False                  # Image is no longer writeable
     results = model.process(image)                 # Make prediction
@@ -211,7 +223,6 @@ def draw_styled_landmarks(image, results):
                              mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2)
                              ) 
 
-
 # Capture video class
 class VideoCamera(object):
     def __init__(self):
@@ -232,8 +243,13 @@ class VideoCamera(object):
         while True:
             (self.grabbed, self.frame) = self.video.read()
 
+def gen(camera, output_file = 'media/output/translation.txt'):
+    # Load the model
+    training = Training.objects.create(is_deployed = "True")
+    deployed_model = training.model_weights
+    absolute_path = os.path.abspath(deployed_model)
+    model = load(absolute_path)
 
-def gen(camera):
     # 1. New detection variables
     sequence = []           # placeholder for 29 frames which makes up a video/sequence
     sentence = []           # the tranlation result
@@ -293,5 +309,5 @@ def gen(camera):
                 b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
 
             # Save detected words to a text file
-            with open('media/output/translation.txt', 'w') as file:
+            with open(output_file, 'w') as file:
                 file.write(' '.join(sentence))
