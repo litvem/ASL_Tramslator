@@ -100,7 +100,6 @@ def training_functionality():
     # dump(trained_model, '{abs_path}{}.joblib'.format(random.randint(1000, 9999)))
     dump(trained_model, f'{abs_path}/{random.randint(1000, 9999)}.joblib')
 
-
 # Model training
 def training(request):
     training_list = Training.objects.all()
@@ -122,7 +121,8 @@ def training(request):
 def translations(request):
     # Get translations for the current user
     current_user = request.user
-    translation_list = Translation_input.objects.get(input_id = current_user.id)
+    #translation_list = Translation_input.objects.get(input_id = current_user.id)
+    translation_list = Translation_input.objects.all()
     # Upload file
     upload_form = UploadForm()
     if request.method == "POST":
