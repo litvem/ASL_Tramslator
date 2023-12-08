@@ -18,6 +18,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse, StreamingHttpResponse
 from django.views.decorators import gzip
 from django.core.files.base import ContentFile
+from django.core.files.base import File
 
 
 # Home
@@ -129,8 +130,9 @@ def translations(request):
         upload_form = UploadForm(request.POST, request.FILES)
         if upload_form.is_valid():
             instance = upload_form.save(commit=False)
-            instance.input_id = request.user    # Assign upload file with currently logged in user
+            instance.input_user = current_user    # Assign upload file with currently logged in user
             instance.save()
+            translateFile(instance.input_id)
         else:
             error_messages = upload_form.errors.values()
             return render(request, "translations.html", {'translation_list': translation_list, 'upload_form':upload_form, 'error_messages':error_messages})
@@ -138,12 +140,15 @@ def translations(request):
 
 # Translate file
 def translateFile(input_id):
-    input = Translation_input.objects.create(input_id = input_id)
+    input = Translation_input.objects.get(input_id = input_id)
     input_file = input.input_file
-    output = Translation_output(output_id = input_id, output_source = input_id, output_file = ContentFile(''))
+    output_file_path = f'media/output/{input.file_name()[:-4]}.txt'
+    output_file = File(open(output_file_path, 'a+'))
+    output = Translation_output(output_user=input.input_user, output_source=input, output_file=output_file_path)
     output.save()
     output_file = output.output_file
     gen(input_file, output_file)
+
 
 # Download file
 def downloadtranslation(request):
@@ -243,13 +248,13 @@ class VideoCamera(object):
         while True:
             (self.grabbed, self.frame) = self.video.read()
 
-def gen(camera, output_file = 'media/output/translation.txt'):
+def gen(camera, output_file = os.path.abspath('media/output/translation.txt')):
     # Load the model
-    training = Training.objects.create(is_deployed = "True")
+    training = Training.objects.get(is_deployed = "True")
     deployed_model = training.model_weights
     absolute_path = os.path.abspath(deployed_model)
     model = load(absolute_path)
-
+    print(absolute_path)
     # 1. New detection variables
     sequence = []           # placeholder for 29 frames which makes up a video/sequence
     sentence = []           # the tranlation result
@@ -257,11 +262,11 @@ def gen(camera, output_file = 'media/output/translation.txt'):
     threshold = 0.2         # how confident should the resulted prediction be so that we present/use it
 
     # give the source of video - 0 for the camera and video path for uploaded videos
-    #cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(camera)
     # the tool we need for extracting keypoints and drawing
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
-        while True:
-            frame = camera.get_frame()     #reads frames every interation 
+        while cap.isOpened():
+            ret, frame = cap.read()     #reads frames every interation 
             print("hereeeee", type(frame), frame.shape)
 
             # Make detections
