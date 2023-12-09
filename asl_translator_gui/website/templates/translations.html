@@ -48,13 +48,17 @@
                     <!-- Table body -->
                     <tbody>
                         {% for translation in translation_list %}
-                        <tr>
-                            <td data-title='Name of translated file'> {{ translation.file_name }} </td>
-                            <td data-title='Date of translation'> {{ translation.input_date }} </td>
-                            <td style="text-align: center;">
-                                <button class='custom-button'>Download</button>
-                            </td>
-                        </tr>
+                            {% for output in output_list %}
+                                {% if translation == output.output_source %}
+                                    <tr>
+                                        <td data-title='Name of translated file'> {{ translation.file_name }} </td>
+                                        <td data-title='Date of translation'> {{ translation.input_date }} </td>
+                                        <td style="text-align: center;">
+                                            <a href="{{ output.output_file.url|slice:'6:' }}" download class='custom-button'>Download</a>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
                         {% endfor %}
                     </tbody>
                     <!-- Table footer with dropdown section -->

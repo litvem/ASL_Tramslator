@@ -147,8 +147,8 @@ def training(request):
 def translations(request):
     # Get translations for the current user
     current_user = request.user
-    #translation_list = Translation_input.objects.get(input_id = current_user.id)
     translation_list = Translation_input.objects.all()
+    output_list = Translation_output.objects.all()  
     # Upload file
     upload_form = UploadForm()
     if request.method == "POST":
@@ -160,9 +160,8 @@ def translations(request):
             translateFile(instance.input_id)
         else:
             error_messages = upload_form.errors.values()
-            return render(request, "translations.html", {'translation_list': translation_list, 'upload_form':upload_form, 'error_messages':error_messages})
-    return render(request, "translations.html", {'translation_list': translation_list, 'upload_form':upload_form})
-
+            return render(request, "translations.html", {'translation_list': translation_list, 'output_list':output_list, 'upload_form':upload_form, 'error_messages':error_messages})
+    return render(request, "translations.html", {'translation_list': translation_list, 'output_list':output_list, 'upload_form':upload_form})
 # Translate file
 def translateFile(input_id):
     input = Translation_input.objects.get(input_id = input_id)
