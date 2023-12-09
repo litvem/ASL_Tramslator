@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}  
+
+{% block content %}
+<head>
+    <title>Register</title>
+</head>
+
+<body class="d-flex flex-column">
+    <main class="flex-shrink-0">
+        <header class="py-5">
+            <div class="container px-5">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8 col-xxl-6">
+                        <div class="text-center my-5">
+                            <h1 class="fw-bolder mb-3">Register User account</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <div class="container">
+            <div class="row justify-content-center" id="frame">
+                <div class="col-6">
+                    <form method="POST" action="{% url 'register' %}">
+                        {% csrf_token %}
+                        {{ user_form.as_p }}
+                        <center>
+                            <button type="submit" class="btn btn-secondary">Register</button><br><br>
+                        </center>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!--script src="{% static 'js/home_scripts.js' %}"></script-->
+</body>
+{% endblock %}

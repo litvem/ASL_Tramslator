@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content%}
+<head>
+    <title>Home</title>
+    <link href="{% static 'css/styles.css'%}" rel="stylesheet" />
+</head>
+
+<body class="d-flex flex-column">
+
+    {% if error_messages %}
+    <div class="container">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error!</strong> The following issue(s) occurred:
+                {% for error_message in error_messages %}
+                    {{ error_message }}
+                {% endfor %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+    {% endif %}
+
+    <main class="flex-shrink-0">
+        <header class="py-5">
+            <div class="container px-5">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8 col-xxl-6">
+                        <div class="text-center my-5">
+                            <h1 class="fw-bolder mb-3">History of your translations</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="container-table">
+            <div class="row">
+                <table class="table">
+                    <!-- Table header line -->
+                    <thead>
+                        <tr>
+                            <th>Name of translated file</th>
+                            <th>Date of translation</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <!-- Table body -->
+                    <tbody>
+                        {% for translation in translation_list %}
+                            {% for output in output_list %}
+                                {% if translation == output.output_source %}
+                                    <tr>
+                                        <td data-title='Name of translated file'> {{ translation.file_name }} </td>
+                                        <td data-title='Date of translation'> {{ translation.input_date }} </td>
+                                        <td style="text-align: center;">
+                                            <a href="{{ output.output_file.url|slice:'6:' }}" download class='custom-button'>Download</a>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                    </tbody>
+                    <!-- Table footer with dropdown section -->
+                    <tfoot>
+                        <tr>
+                        <th colspan='4'>
+                            <a data-toggle="collapse" class="collapse" href="#collapsableWindow">Upload file</a>
+                        </th>
+                        </tr>
+                    </tfoot>
+                </table>
+                <button type="btn btn-secondary" class="collapsible">New translation</button>
+                <div class="container-upload">
+                    <div class="header-section">
+                        <p>Upload file you want to translate<br>Only <strong>MP4</strong> files not exceeding <strong>100MB</strong> are allowed</p>
+                    </div>
+                    <form method="POST" enctype="multipart/form-data" id="uploadForm" class="drop-section">
+                        {% csrf_token %}
+                        <div class="cloud-icon">
+                            <img src="{% static 'assets/upload_icon.png' %}" alt="cloud">
+                        </div>
+                        {{ upload_form.as_p }}
+                        <button id="upload-button">Upload</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Success modal/popup -->
+        <div class="modal fade" id="sucess-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" area-hidden="true">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" area-label="Close"></button>
+                    <p>Your file has been translated successfully and transcript is available for download.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="{% static 'js/translation_scripts.js' %}" defer></script>
+</body>
+{% endblock %}

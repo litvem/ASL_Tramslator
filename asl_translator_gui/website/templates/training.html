@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<head>
+    <title>Model training</title>
+</head>
+
+<body class="d-flex flex-column">
+    <!-- Alert for error messages if uploding file had wrong format -->
+    {% if tr_error_messages %}
+    <div class="container">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error!</strong> The following issue(s) occurred:
+                {% for tr_error_message in tr_error_messages %}
+                    {{ tr_error_message }}
+                {% endfor %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+    {% endif %}
+    <main class="flex-shrink-0">
+        <header class="py-5">
+            <div class="container px-5">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8 col-xxl-6">
+                        <div class="text-center my-5">
+                            <h1 class="fw-bolder mb-3">History of model training</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="container-table">
+            <div class="row">
+                <table class="fixed_header table-sortable">
+                    <thead>
+                        <tr>
+                            <th>Model ID</th>
+                            <th>Date of training</th>
+                            <th>Training accuracy</th>
+                            <th>Testing accuracy</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                        <th colspan='5'>
+                            <a data-toggle="collapse" class="collapse" href="#collapsableWindow">Re-train model</a>
+                        </th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        {% for training in training_list %}
+                        <tr>
+                            <td data-title='Model ID'> {{ training.model_id }} </td>
+                            <td data-title='Date of training'> {{ training.training_date }} </td>
+                            <td data-title="Training accuracy"> {{ training.training_accuracy }}% </td>
+                            <td data-title="Testing accuracy"> {{ training.testing_accuracy }}% </td>
+                            <td class='deploy'>
+                                {% if training.is_deployed %}
+                                    <button class='btn btn-success' disabled>Deployed</button>
+                                {% else %}
+                                    <a class='btn btn-dark' href='#'>Deploy</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                        <th colspan='5'>
+                            <a data-toggle="collapse" class="collapse" href="#collapsableWindow">Retrain model</a>
+                        </th>
+                        </tr>
+                    </tfoot>
+                </table>
+                <button type="submit" class="collapsible">Retrain Model</button>                
+                <div class="container-upload">
+                    <div class="header-section">
+                        <p>Upload file you want to translate<br>Only <strong>JSON</strong> files are allowed</p>
+                    </div>
+                    <form method="POST" enctype="multipart/form-data" id="trainingUploadForm" class="drop-section">
+                        {% csrf_token %}
+                        <div class="cloud-icon">
+                            <img src="{% static 'assets/upload_icon.png' %}" alt="cloud">
+                        </div>
+                        {{ tr_upload_form.as_p }}
+                        <button id="upload-button">Upload</button>
+                    </form>
+                    </div>
+                </div> 
+            </div>
+        </div>
+    </main>
+    <script src="{% static 'js/training_scripts.js'%}"></script>
+
+    <script>
+        $(document).ready(function() {
+            $("#trainingUploadForm").submit(function(e) {
+                e.preventDefault();
+                
+                // Display a loading message
+                $("#upload-button").text("Uploading...").prop("disabled", true);
+        
+                // Create a FormData object and append the file data
+                var formData = new FormData($(this)[0]);
+        
+                // Send an AJAX request to the Django view
+                $.ajax({
+                    url: $(this).attr("action"),
+                    type: $(this).attr("method"),
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        // Display a success message
+                        alert(response.message);
+                    },
+                    error: function(xhr, status, error) {
+                        // Display detailed error messages
+                        if (xhr.responseJSON && xhr.responseJSON.error_messages) {
+                            var errorMessages = xhr.responseJSON.error_messages;
+                            var errorMessageString = "<strong>Error!</strong> The following issue(s) occurred:<br>";
+        
+                            for (var i = 0; i < errorMessages.length; i++) {
+                                errorMessageString += errorMessages[i] + "<br>";
+                            }
+        
+                            // Display error messages in a Bootstrap alert
+                            $("#error-alert").html(errorMessageString);
+                            $("#error-alert").removeClass("d-none");
+                        } else {
+                            // Display a generic error message
+                            alert("Error uploading file: " + error);
+                        }
+                    },
+                    complete: function() {
+                        $("#upload-button").text("Upload").prop("disabled", false);
+                        $("#trainingUploadForm")[0].reset();
+                    }
+                });
+            });
+        });
+        </script>
+            
+</body>
+{% endblock %}  
