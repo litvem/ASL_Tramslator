@@ -9,7 +9,7 @@ import pipelines.pipes.training_pipeline as trainM
 from .models import *
 from .forms import *
 from joblib import dump, load
-
+import sqlite3
 from django.core.files.storage import FileSystemStorage
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -17,7 +17,11 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.http import HttpResponse, StreamingHttpResponse
 from django.views.decorators import gzip
-
+from data.upload_retraining_json_to_db import DataHandler
+import json
+from django.http import JsonResponse
+from datetime import date
+from tensorflow.keras.models import Sequential
 
 # Home
 def home(request):
@@ -87,6 +91,7 @@ def logout_user(request):
 
 # Retraining functionality
 def training_functionality():
+    
     data = prepareD.data_pipeline.fit_transform(None)
     ##run some tests
     data2 = data
@@ -95,28 +100,44 @@ def training_functionality():
     trained_model = result['model']
     accuracy = result['accuracy']
     train_accuracy = result['train_accuracy']
-    abs_path = os.path.abspath('trained_models')
-    # dump(trained_model, '{abs_path}{}.joblib'.format(random.randint(1000, 9999)))
-    dump(trained_model, f'{abs_path}/{random.randint(1000, 9999)}.joblib')
-
-
-# Model training
+    trained_model.save('asl_translator_gui/trained_models/{}.h5'.format(random.randint(1000,9999)))
+    # abs_path = os.path.abspath('models')
+    print(f"accuracy {accuracy}")
+    print(f" train accuracy {train_accuracy}")
+    # abs_path = os.path.abspath("data/retrained-model")
+    # dump(trained_model,f'{abs_path}.joblib'.format(random.randint(1000, 9999)))
+    # dump(trained_model, f'{abs_path}/{random.randint(1000, 9999)}.joblib')
+    return trained_model,accuracy, train_accuracy
+    
 def training(request):
     training_list = Training.objects.all()
     tr_upload_form = UploadTrainingForm()
+
     if request.method == 'POST':
         tr_upload_form = UploadTrainingForm(request.POST, request.FILES)
+
         if tr_upload_form.is_valid():
+            uploaded_file = request.FILES['tr_input_file']
             instance = tr_upload_form.save(commit=False)
-            instance.input_id = request.user    # Assign upload file with currently logged in user
+            instance.tr_input_id = request.user
             instance.save()
-            # result = training_functionality()
-            # return HttpResponse(result)
+            trained_model, accuracy, train_accuracy = training_functionality()
+            print(accuracy)
+            print(train_accuracy)
+            new_record = Training()
+            new_record.training_accuracy = int(train_accuracy)*100
+            new_record.testing_accuracy = int(accuracy)*100
+            new_record.training_date = date.today()
+            new_record.model_weights = trained_model
+            new_record.is_deployed = False
+            new_record.save()
+            training_list = Training.objects.all()
+            print(training_list.values())
         else:
             tr_error_messages = tr_upload_form.errors.values()
-            return render(request, "training.html", {'training_list': training_list, 'tr_upload_form':tr_upload_form, 'tr_error_messages':tr_error_messages})
-    return render(request, "training.html", {'training_list': training_list, 'tr_upload_form':tr_upload_form})    
+            return render(request, "training.html", {'training_list': training_list, 'tr_upload_form': tr_upload_form, 'tr_error_messages': tr_error_messages})
 
+    return render(request, "training.html", {'training_list': training_list, 'tr_upload_form': tr_upload_form})
 
 # History of user's translations
 def translations(request):
@@ -147,12 +168,8 @@ def downloadtranslation(request):
 mp_holistic = mp.solutions.holistic # Holistic model
 mp_drawing = mp.solutions.drawing_utils # Drawing utilities
 # The labels/words we can predict
-# actions = np.array(['nice','teacher','eat','no','happy','like','orange','want','deaf','school','sister','finish','white',
-#                       'what','tired','friend','sit','yes','student','spring','good','hello','mother','fish','again','learn',
-#                       'sad','table','where','father','milk','paper','forget','cousin','brother','nothing','book','girl','fine',
-#                       'black'])
-actions = np.array(['nice'])
-
+# actions = np.array(['nice','eat', 'teacher', 'no', 'like', 'deaf', 'sister', 'father', 'hello', 'me', 'yes', 'want', 'deaf', 'you', 'meet', 'pineapple', 
+#                       'thank you', 'beautiful', 'and', 'woman'])
 
 # # Load the model
 # absolute_path = os.path.abspath("media/models/V_0_wtGgQyu.joblib")

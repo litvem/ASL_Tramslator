@@ -11,15 +11,35 @@ from tensorflow.keras.utils import to_categorical
 from sklearn.metrics import accuracy_score
 from sklearn.base import BaseEstimator, TransformerMixin
 from joblib import dump, load
+import json
+from website.models import *
+from data.upload_retraining_json_to_db import DataHandler
+
+
 
 #path to our np arrays
 DATA_PATH = os.path.join(os.path.abspath('data/MP_Data')) 
 #list of all our labels
-# actions = ['nice','teacher','eat','no','happy','like','orange','want','deaf','school','sister','finish','white',
-#                       'what','tired','friend','sit','yes','student','spring','good','hello','mother','fish','again','learn',
-#                       'sad','table','where','father','milk','paper','forget','cousin','brother','nothing','book','girl','fine',
-#                       'black']
-actions = np.array(['nice'])
+actions = ['nice','eat', 'teacher', 'no', 'like', 'deaf', 'sister', 'father', 'hello', 'me', 'yes', 'want', 'deaf', 'you', 'meet', 'pineapple', 
+                      'thank you', 'beautiful', 'and', 'woman']
+directory_path = os.path.abspath("media/input")
+
+# path_to_model_weights = None
+# Last_deployed_model = Training.objects.get(is_deployed = True)
+# path_to_model_weights = Last_deployed_model.model_weights
+# print(path_to_model_weights)
+
+# json_files = [f for f in os.listdir(directory_path) if f.endswith('.json')]
+# if json_files:
+#     # Get the full paths of the JSON files
+#     json_paths = [os.path.join(directory_path, f) for f in json_files]
+
+#     # Find the newest JSON file based on modification time
+#     newest_json_path = max(json_paths, key=os.path.getmtime)
+# last_uploaded_json_file = json.loads((Training_input.objects.latest('id').tr_input_file).read().decode('utf-8'))
+# clean_texts = [entry.get("clean_text", "") for entry in last_uploaded_json_file]
+# actions= np.array(clean_texts)
+# print(actions)
 
 
 #class for the model trainer
@@ -34,6 +54,7 @@ class TrainModelTransformer(BaseEstimator, TransformerMixin):
         self.accuracy = 0
         self.train_accuracy = 0
 
+
     def fit(self, X, y=None):
         #for visulization and testing
         log_dir = os.path.join('Logs')
@@ -43,12 +64,20 @@ class TrainModelTransformer(BaseEstimator, TransformerMixin):
         #lists for our final videos (np arrays) and labels
         sequences, labels = [], []
         #for all the actions and all their videos (folders of np arrays)
+        
+        last_uploaded_json_file = json.loads((Training_input.objects.latest('id').tr_input_file).read().decode('utf-8'))
+        clean_texts = [entry.get("clean_text", "") for entry in last_uploaded_json_file]
+        actions_retrain= np.array(clean_texts)
+        print(actions_retrain)
+        
+        self.actions = actions_retrain
+        
         for action in self.actions:
             videos = os.listdir(os.path.abspath("data/MP_Data") + "/" + "{}".format(action))
             if ".DS_Store" in videos:
                 videos.remove(".DS_Store")
-            #pick 38 random videos for each action
-            random_videos = random.sample(videos, 33)
+            #pick 2 random videos for each action
+            random_videos = random.sample(videos, 1)
             #for all those videos
             for sequence in random_videos:
                 window = []
@@ -89,24 +118,35 @@ class TrainModelTransformer(BaseEstimator, TransformerMixin):
         #split the data into train and test set with 80-20% ratio
         X_train, X_test, y_train, y_test = train_test_split(Z, y, test_size=0.2)
 
+
+        
         #model's architecture
         self.model = Sequential()
         self.model.add(LSTM(64, return_sequences=True, activation='tanh', input_shape=(29,1662)))
-        self.model.add(Dropout(0.2))
+        #self.model.add(Dropout(0.2))
         self.model.add(LSTM(128, return_sequences=True, activation='tanh'))
-        self.model.add(Dropout(0.2))
+        #self.model.add(Dropout(0.2))
         self.model.add(LSTM(64, return_sequences=False, activation='tanh'))
-        self.model.add(Dropout(0.2))
+       # self.model.add(Dropout(0.2))
         self.model.add(Dense(64, activation='relu'))
-        self.model.add(Dropout(0.2))
+        #self.model.add(Dropout(0.2))
         self.model.add(Dense(64, activation='relu'))
-        self.model.add(Dropout(0.2))
+       # self.model.add(Dropout(0.2))
         self.model.add(Dense(32, activation='relu'))
-        self.model.add(Dropout(0.2))
+        #self.model.add(Dropout(0.2))
         self.model.add(Dense(np.array(self.actions).shape[0], activation='softmax'))
 
         #compile the model and fit
         self.model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
+        
+        
+        Last_deployed_model = Training.objects.get(is_deployed = True)
+        path_to_model_weights = str(Last_deployed_model.model_weights)
+        print(path_to_model_weights)
+        abs_path_to_model_weights = os.path.abspath("media/"+ path_to_model_weights)
+        # path_to_model_weights = "C:/Users/yasi7/Downloads/data/gui_new/ASL-translator/asl_translator_gui/media/models/actions_solution_20l_v0_1.h5"
+        
+        self.model.load_weights(abs_path_to_model_weights)
         self.model.fit(X_train, y_train, epochs=self.epochs, callbacks=[tb_callback])
         
         # Evaluate the model on the test set
@@ -120,11 +160,32 @@ class TrainModelTransformer(BaseEstimator, TransformerMixin):
 
     def transform(self, X):
         #return the results of the pipeline
+        path_to_MP_Data = os.path.join(os.path.abspath("data/MP_Data"))
+        path_to_videos = os.path.join(os.path.abspath("data/videos"))
+        files_in_MP_Data = os.listdir(path_to_MP_Data)
+        files_in_videos = os.listdir(path_to_videos)
+        for file_name in files_in_MP_Data:
+            file_path = os.path.join(path_to_MP_Data, file_name)
+            try:
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+                    print(f"Deleted: {file_path}")
+            except Exception as e:
+                print(f"Error deleting {file_path}: {e}")
+        for file_name in files_in_videos:
+            file_path = os.path.join(path_to_MP_Data, file_name)
+            try:
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+                    print(f"Deleted: {file_path}")
+            except Exception as e:
+                print(f"Error deleting {file_path}: {e}")
         return {'model': self.model, 'accuracy': self.accuracy, 'train_accuracy': self.train_accuracy}
 
 
+
 train_pipeline = Pipeline([
-    ('preprocessAndFit', TrainModelTransformer(actions=actions,target_file_count=29, epochs=5000))
+    ('preprocessAndFit', TrainModelTransformer(actions=actions,target_file_count=29, epochs=100))
 ])
 
 #runs the pipeline ****for testing, comment later***** 
