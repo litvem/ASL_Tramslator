@@ -19,6 +19,8 @@ from django.http import HttpResponse, StreamingHttpResponse
 from django.views.decorators import gzip
 from django.core.files.base import ContentFile
 from django.core.files.base import File
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense, Dropout
 
 
 # Home
@@ -142,12 +144,16 @@ def translations(request):
 def translateFile(input_id):
     input = Translation_input.objects.get(input_id = input_id)
     input_file = input.input_file
+    print(str(input_file))
     output_file_path = f'media/output/{input.file_name()[:-4]}.txt'
+    print(f'This is the output file in translation{output_file_path}')
     output_file = File(open(output_file_path, 'a+'))
     output = Translation_output(output_user=input.input_user, output_source=input, output_file=output_file_path)
     output.save()
     output_file = output.output_file
-    gen(input_file, output_file)
+    print("Before gen function")
+    gen(input_file, output_file_path)
+    print("after gen function")
 
 
 # Download file
@@ -157,15 +163,6 @@ def downloadtranslation(request):
     #filepath = base_dir + 
 ###
 
-# Holistics for the drawing of keypoints
-mp_holistic = mp.solutions.holistic # Holistic model
-mp_drawing = mp.solutions.drawing_utils # Drawing utilities
-# The labels/words we can predict
-# actions = np.array(['nice','teacher','eat','no','happy','like','orange','want','deaf','school','sister','finish','white',
-#                       'what','tired','friend','sit','yes','student','spring','good','hello','mother','fish','again','learn',
-#                       'sad','table','where','father','milk','paper','forget','cousin','brother','nothing','book','girl','fine',
-#                       'black'])
-actions = np.array(['nice'])
 
 @gzip.gzip_page
 def live(request):
@@ -178,14 +175,6 @@ def live(request):
     return render(request, 'live.html')
 
 def mediapipe_detection(image, model):
-    # Load the model
-    training_list = Training.objects.all()
-    for training in training_list:
-        if (training.is_deployed):
-            deployed_model = training.model_weights
-            absolute_path = os.path.abspath(deployed_model)
-            model = load(absolute_path)
-
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # COLOR CONVERSION BGR 2 RGB
     image.flags.writeable = False                  # Image is no longer writeable
     results = model.process(image)                 # Make prediction
@@ -201,6 +190,8 @@ def extract_keypoints(results):
     return np.concatenate([pose, face, lh, rh])
 
 def draw_landmarks(image, results):
+    mp_holistic = mp.solutions.holistic 
+    mp_drawing = mp.solutions.drawing_utils # Drawing utilities
     mp_drawing.draw_landmarks(image, results.face_landmarks, mp_holistic.FACE_CONNECTIONS) # Draw face connections
     mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS) # Draw pose connections
     mp_drawing.draw_landmarks(image, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS) # Draw left hand connections
@@ -208,6 +199,8 @@ def draw_landmarks(image, results):
 
 def draw_styled_landmarks(image, results):
     # Draw face connections
+    mp_holistic = mp.solutions.holistic 
+    mp_drawing = mp.solutions.drawing_utils # Drawing utilities
     mp_drawing.draw_landmarks(image, results.face_landmarks, mp_holistic.FACEMESH_TESSELATION, 
                              mp_drawing.DrawingSpec(color=(80,110,10), thickness=1, circle_radius=1), 
                              mp_drawing.DrawingSpec(color=(80,256,121), thickness=1, circle_radius=1)
@@ -248,30 +241,52 @@ class VideoCamera(object):
         while True:
             (self.grabbed, self.frame) = self.video.read()
 
-def gen(camera, output_file = os.path.abspath('media/output/translation.txt')):
+def gen(camera, output_file):
     # Load the model
+    actions = ['nice','eat', 'teacher', 'no', 'like', 'deaf', 'sister', 'father', 'hello', 'me', 'yes', 'want', 'deaf', 'you', 'meet', 'pineapple', 
+                      'thank you', 'beautiful', 'and', 'woman']
+    print(camera)
+    print(output_file)
     training = Training.objects.get(is_deployed = "True")
     deployed_model = training.model_weights
-    absolute_path = os.path.abspath(deployed_model)
-    model = load(absolute_path)
-    print(absolute_path)
+    absolute_path = os.path.abspath("media/" + str(deployed_model))
+    absolute_path_to_camera = os.path.abspath("media/" +str(camera))
+    print("aboluste path to the camera ", absolute_path_to_camera)
+    # model architecture
+    model = Sequential()
+    model.add(LSTM(64, return_sequences=True, activation='tanh', input_shape=(29,1662)))
+    model.add(LSTM(128, return_sequences=True, activation='tanh'))
+    model.add(LSTM(64, return_sequences=False, activation='tanh'))
+    model.add(Dense(64, activation='relu'))
+    model.add(Dense(64, activation='relu'))
+    model.add(Dense(32, activation='relu'))
+    model.add(Dense(np.array(actions).shape[0], activation='softmax'))
+    model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
+    model.load_weights(absolute_path)
+    print("The absolute path to the model ", absolute_path)
     # 1. New detection variables
     sequence = []           # placeholder for 29 frames which makes up a video/sequence
     sentence = []           # the tranlation result
     predictions = []        # what the model predicts
-    threshold = 0.2         # how confident should the resulted prediction be so that we present/use it
+    threshold = 0.5         # how confident should the resulted prediction be so that we present/use it
 
+    mp_holistic = mp.solutions.holistic # Holistic model
     # give the source of video - 0 for the camera and video path for uploaded videos
-    cap = cv2.VideoCapture(camera)
+    cap = cv2.VideoCapture(absolute_path_to_camera)
     # the tool we need for extracting keypoints and drawing
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
+        if(cap.isOpened()==False):
+            print("the camera is not open")
         while cap.isOpened():
             ret, frame = cap.read()     #reads frames every interation 
-            print("hereeeee", type(frame), frame.shape)
+            print("hereeeee")
 
+            if not ret:
+                print('failed to read frame from the video!')
+                break
             # Make detections
             image, results = mediapipe_detection(frame, holistic)   
-
+            print(results)
             # Draw landmarks
             draw_styled_landmarks(image, results)
         
@@ -287,18 +302,18 @@ def gen(camera, output_file = os.path.abspath('media/output/translation.txt')):
                 predictions.append(np.argmax(res))
 
             #3. Viz logic
-            if predictions and np.unique(predictions[-10:])[0]==np.argmax(res): 
-                if res[np.argmax(res)] > threshold: 
-                    
-                    if len(sentence) > 0: 
-                        if actions[np.argmax(res)] != sentence[-1]:
+                if predictions and np.unique(predictions[-10:])[0]==np.argmax(res): 
+                    if res[np.argmax(res)] > threshold: 
+                        
+                        if len(sentence) > 0: 
+                            if actions[np.argmax(res)] != sentence[-1]:
+                                sentence.append(actions[np.argmax(res)])
+                        else:
                             sentence.append(actions[np.argmax(res)])
-                    else:
-                        sentence.append(actions[np.argmax(res)])
 
-            # Limit to last 5 words
-            if len(sentence) > 5: 
-                sentence = sentence[-5:]
+                # Limit to last 5 words
+                #if len(sentence) > 5: 
+                 #   sentence = sentence[-5:]
 
             # Viz probabilities
             #image = prob_viz(res, actions, image, colors)
@@ -308,11 +323,17 @@ def gen(camera, output_file = os.path.abspath('media/output/translation.txt')):
             cv2.putText(image, ' '.join(sentence), (3,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
             # save the result and pass it to the streem
-            _, buffer = cv2.imencode('.jpg', image)
-            frame_bytes = buffer.tobytes()
-            yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
+            # _, buffer = cv2.imencode('.jpg', image)
+            # frame_bytes = buffer.tobytes()
+            # yield (b'--frame\r\n'
+            #     b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
 
             # Save detected words to a text file
-            with open(output_file, 'w') as file:
-                file.write(' '.join(sentence))
+    with open(output_file, 'w') as file:
+        # file.write(' '.join(sentence))
+        file.write(str(sentence))
+        file.close()
+        
+    cap.release()
+    cv2.destroyAllWindows()
+            
