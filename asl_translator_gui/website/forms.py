@@ -40,10 +40,14 @@ class UploadForm(forms.ModelForm):
 
 
 # Upload file for training form
-class UploadTrainingForm(forms.ModelForm):
+class UploadTrainingForm(forms.ModelForm):    
     class Meta:
         model = Training_input
         fields = ('tr_input_file',)
         tr_input_file = forms.FileField(label='Upload file')
         training_accuracy = forms.DecimalField(label='Training Accuracy', required=False)
         testing_accuracy = forms.DecimalField(label='Testing Accuracy', required=False)
+    
+    tr_input_file = forms.FileField(label='Uploaded file:')
+        
+    

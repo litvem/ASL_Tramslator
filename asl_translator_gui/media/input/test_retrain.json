@@ -1,0 +1,40 @@
+[
+    {"org_text": "sister", "clean_text": "sister", "start_time": 1.0, "signer_id": 69, "signer": 17, "start": 30, "end": 120, "file": "How to sign Sister - ASL Vocabulary Series", "label": 11, "height": 360.0, "fps": 30.0, "end_time": 4.0, "url": "https://www.youtube.com/watch?v=4g_w14wZGoA", "review": 1, "text": "sister", "box": [0.023836642503738403, 0.21081703901290894, 1.0, 0.768979549407959], "width": 480.0},
+
+    {"org_text": "hello", "clean_text": "hello", "start_time": 0.0, "signer_id": 2, "signer": 81, "start": 0, "end": 70, "file": "Hello(1)", "label": 0, "height": 360.0, "fps": 17.134, "end_time": 4.085, "url": "https://www.youtube.com/watch?v=FbBdHdmt5oI", "text": "hello", "box": [0.0, 0.10837215185165405, 0.9998147487640381, 0.840895414352417], "width": 640.0},
+
+    {"org_text": "me", "clean_text": "me", "start_time": 0.0, "signer_id": 2, "signer": 81, "start": 0, "end": 114, "file": "Me", "label": 112, "height": 360.0, "fps": 17.336, "end_time": 6.576, "url": "https://www.youtube.com/watch?v=zNS_G0L63Tc", "text": "me", "box": [0.0, 0.10452735424041748, 1.0, 0.7855894565582275], "width": 640.0},
+
+    {"org_text": "yes", "clean_text": "yes", "start_time": 0.0, "signer_id": 2, "signer": 81, "start": 0, "end": 140, "file": "Yes", "label": 20, "height": 360.0, "fps": 29.659, "end_time": 4.72, "url": "https://www.youtube.com/watch?v=zGwP9fAhpl4", "review": 1, "text": "yes", "box": [0.0, 0.137131929397583, 1.0, 0.8112356662750244], "width": 640.0},
+
+    {"org_text": "eat", "clean_text": "eat", "start_time": 0.0, "signer_id": 69, "signer": 34, "start": 0, "end": 98, "file": "How to sign Eat - ASL Vocabulary Series", "label": 3, "height": 360.0, "fps": 30.0, "end_time": 3.267, "url": "https://www.youtube.com/watch?v=Gh3mZxIjKFE", "text": "eat", "box": [0.0, 0.2127971649169922, 1.0, 0.8066989183425903], "width": 480.0},
+
+    {"org_text": "nice", "clean_text": "nice", "start_time": 0.0, "signer_id": 38, "signer": 52, "start": 0, "end": 92, "file": "nice in American Sign Language", "label": 1, "height": 270.0, "fps": 29.917, "end_time": 3.075, "url": "www.youtube.com/watch?v=3aXS3keR8oY", "text": "nice", "box": [0.013679355382919312, 0.18594351410865784, 1.0, 0.7082176208496094], "width": 480.0},
+  
+    {"org_text": "teacher", "clean_text": "teacher", "start_time": 0.0, "signer_id": 2, "signer": 26, "start": 0, "end": 137, "file": "Teacher", "label": 2, "height": 360.0, "fps": 17.157, "end_time": 7.985, "url": "https://www.youtube.com/watch?v=cqyB9f32GuI", "text": "teacher", "box": [0.0006011426448822021, 0.15566471219062805, 1.0, 0.8559228181838989], "width": 640.0},
+    
+    {"org_text": "no", "clean_text": "no", "start_time": 0.0, "signer_id": 38, "signer": 52, "start": 0, "end": 104, "file": "no in American Sign Language", "label": 4, "height": 360.0, "fps": 29.97, "end_time": 3.47, "url": "www.youtube.com/watch?v=nyUDOPmQlZQ", "text": "no", "box": [0.0340556800365448, 0.3050392270088196, 1.0, 0.7180224061012268], "width": 640.0},
+    
+    {"org_text": "like", "clean_text": "like", "start_time": 1.335, "signer_id": 1, "signer": 2, "start": 40, "end": 110, "file": "ASL Vocabulary like", "label": 6, "height": 360.0, "fps": 29.97, "end_time": 3.67, "url": "https://www.youtube.com/watch?v=FECmADZAuxI", "review": 1, "text": "like", "box": [0.0, 0.21936410665512085, 1.0, 0.9957413077354431], "width": 640.0},
+  
+    {"org_text": "want", "clean_text": "want", "start_time": 0.0, "signer_id": 2, "signer": 58, "start": 0, "end": 105, "file": "Want(1)", "label": 8, "height": 360.0, "fps": 29.663, "end_time": 3.54, "url": "https://www.youtube.com/watch?v=38kOjIIo8yQ", "text": "want", "box": [0.0, 0.2234189808368683, 1.0, 0.8720798492431641], "width": 640.0},
+
+    {"org_text": "deaf", "clean_text": "deaf", "start_time": 0.0, "signer_id": 62, "signer": -1, "start": 0, "end": 59, "file": "Sign for DEAF from page 13", "label": 9, "height": 360.0, "fps": 30.0, "end_time": 1.967, "url": "https://www.youtube.com/watch?v=27djXV1qAss", "text": "deaf", "box": [0.06777507066726685, 0.24436399340629578, 1.0, 0.7560802102088928], "width": 640.0},
+
+    {"org_text": "you", "clean_text": "you", "start_time": 1.001, "signer_id": 1, "signer": 2, "start": 30, "end": 80, "file": "ASL Vocabulary you", "label": 68, "height": 360.0, "fps": 29.97, "end_time": 2.669, "url": "https://www.youtube.com/watch?v=Pw-wu8Y21bQ", "review": 1, "text": "you", "box": [0.00499233603477478, 0.1921011507511139, 1.0, 0.9994487762451172], "width": 640.0},
+
+    {"org_text": "meet", "clean_text": "meet", "start_time": 0.545, "signer_id": 2, "signer": 80, "start": 10, "end": 60, "file": "Meet", "label": 107, "height": 360.0, "fps": 18.357, "end_time": 3.269, "url": "https://www.youtube.com/watch?v=neVSKkqLDa4", "review": 1, "text": "meet", "box": [0.0, 0.0035500526428222656, 1.0, 0.9588338136672974], "width": 640.0},
+
+    {"org_text": "pineapple", "clean_text": "pineapple", "start_time": 0.0, "signer_id": 0, "signer": 0, "start": 0, "end": 88, "file": "PINEAPPLE(1)", "label": 615, "height": 360.0, "fps": 29.97, "end_time": 2.936, "url": "www.youtube.com/watch?v=1x7E5RakWdg", "text": "pineapple", "box": [0.06553944945335388, 0.2498377114534378, 1.0, 0.7400960326194763], "width": 640.0},
+
+    {"org_text": "father", "clean_text": "father", "start_time": 0.0, "signer_id": 69, "signer": 33, "start": 0, "end": 110, "file": "How to sign Father - ASL Vocabulary Series", "label": 31, "height": 360.0, "fps": 30.0, "end_time": 3.667, "url": "https://www.youtube.com/watch?v=ZEAiYaeLTZs", "text": "father", "box": [0.0, 0.021661818027496338, 1.0, 0.804151713848114], "width": 480.0},
+
+    {"org_text": "thank you", "clean_text": "thank you", "start_time": 0.0, "signer_id": 2, "signer": 58, "start": 0, "end": 89, "file": "Thank you", "label": 75, "height": 360.0, "fps": 17.13, "end_time": 5.196, "url": "https://www.youtube.com/watch?v=QUF1JHzBXhw", "text": "thanks", "box": [0.0, 0.2354910671710968, 1.0, 0.8798049688339233], "width": 640.0},
+
+    {"org_text": "beautiful", "clean_text": "beautiful", "start_time": 2.002, "signer_id": 144, "signer": -1, "start": 60, "end": 130, "file": "beautiful - ASL sign for beautiful", "label": 62, "height": 360.0, "fps": 29.97, "end_time": 4.338, "url": "https://www.youtube.com/watch?v=NY3f0h62fZc", "review": 1, "text": "beautiful", "box": [0.06920069456100464, 0.05352696776390076, 1.0, 1.0], "width": 480.0},
+
+    {"org_text": "and", "clean_text": "and", "start_time": 0.0, "signer_id": 0, "signer": 0, "start": 0, "end": 97, "file": "and", "label": 708, "height": 720.0, "fps": 29.97, "end_time": 3.237, "url": "https://www.youtube.com/watch?v=PvFguNv1zIk", "text": "and", "box": [0.020688951015472412, 0.23142097890377045, 0.9977561235427856, 0.7393804788589478], "width": 1280.0},
+
+    {"org_text": "woman", "clean_text": "woman", "start_time": 0.0, "signer_id": 2, "signer": 58, "start": 0, "end": 113, "file": "Woman", "label": 93, "height": 360.0, "fps": 17.082, "end_time": 6.615, "url": "https://www.youtube.com/watch?v=sRFEk6j4w_8", "text": "woman", "box": [0.0, 0.07120031118392944, 1.0, 0.8144398927688599], "width": 640.0}
+
+]

@@ -149,7 +149,7 @@ def prepare_data(X, DATA_PATH, actions, sequence_length, videos_folder, DB_path)
         clean_text_values = actions.tolist()
         
         #query for reading all the data ****replace "MSASL_DATA" with the name of the table that holds the data
-        query = 'SELECT * FROM RETRAINING_DATA_4 WHERE clean_text IN ({})'.format(','.join(['?'] * len(clean_text_values)))
+        query = 'SELECT * FROM RETRAINING_DATA_5 WHERE clean_text IN ({})'.format(','.join(['?'] * len(clean_text_values)))
         #executes the query 
         cursor.execute(query, clean_text_values)
 
@@ -203,7 +203,7 @@ def prepare_data(X, DATA_PATH, actions, sequence_length, videos_folder, DB_path)
         print(video_id)
 
     
-    table_name = 'RETRAINING_DATA_4'
+    table_name = 'RETRAINING_DATA_5'
     cursor.execute(f'DROP TABLE IF EXISTS {table_name}')
     
     connection.commit()

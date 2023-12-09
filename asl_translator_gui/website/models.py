@@ -46,8 +46,8 @@ class Training(models.Model):
     model_id = models.AutoField(primary_key=True)
     tr_input_file = models.ForeignKey(Training_input, on_delete=models.CASCADE, blank=True, null=True)
     training_date = models.DateField(default=datetime.datetime.today)
-    training_accuracy = models.DecimalField(max_digits=5, decimal_places=2, default=0, blank=True, null=True)
-    testing_accuracy = models.DecimalField(max_digits=5, decimal_places=2, default=0, blank=True, null=True)
+    training_accuracy = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    testing_accuracy = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     model_weights = models.FileField(upload_to="models/", blank=True, null=True)
     is_deployed = models.BooleanField(default=False, blank=True, null=True)
   

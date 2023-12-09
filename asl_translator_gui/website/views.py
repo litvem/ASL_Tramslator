@@ -24,7 +24,6 @@ from datetime import date
 from tensorflow.keras.models import Sequential
 from django.core.files.base import ContentFile
 from django.core.files.base import File
-from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 
 
@@ -171,10 +170,10 @@ def translateFile(input_id):
     print(str(input_file))
     output_file_path = f'media/output/{input.file_name()[:-4]}.txt'
     print(f'This is the output file in translation{output_file_path}')
-    output_file = File(open(output_file_path, 'a+'))
+    # output_file = File(open(output_file_path, 'a+'))
     output = Translation_output(output_user=input.input_user, output_source=input, output_file=output_file_path)
     output.save()
-    output_file = output.output_file
+    # output_file = output.output_file
     print("Before gen function")
     gen(input_file, output_file_path)
     print("after gen function")
@@ -275,7 +274,8 @@ def gen(camera, output_file):
     deployed_model = training.model_weights
     absolute_path = os.path.abspath("media/" + str(deployed_model))
     absolute_path_to_camera = os.path.abspath("media/" +str(camera))
-    print("aboluste path to the camera ", absolute_path_to_camera)
+    print("The absolute path to the model ", absolute_path)
+    print("absolute path to the camera ", absolute_path_to_camera)
     # model architecture
     model = Sequential()
     model.add(LSTM(64, return_sequences=True, activation='tanh', input_shape=(29,1662)))
@@ -287,7 +287,6 @@ def gen(camera, output_file):
     model.add(Dense(np.array(actions).shape[0], activation='softmax'))
     model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
     model.load_weights(absolute_path)
-    print("The absolute path to the model ", absolute_path)
     # 1. New detection variables
     sequence = []           # placeholder for 29 frames which makes up a video/sequence
     sentence = []           # the tranlation result
