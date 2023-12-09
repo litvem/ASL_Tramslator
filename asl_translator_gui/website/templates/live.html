@@ -25,7 +25,8 @@
                 <div class="row gx-5">
                     <div class="col-12">
                         <center>
-                        <img class="img-fluid rounded-3 mb-5" src="https://dummyimage.com/1300x700/343a40/6c757d" alt="..." width="700" height="375"/>
+                        {% comment %} <img class="img-fluid rounded-3 mb-5" src="https://dummyimage.com/1300x700/343a40/6c757d" alt="..." width="700" height="375"/> {% endcomment %}
+                        <img id="video_feed" class="img-fluid rounded-3 mb-5" src="{% url 'live' %}" alt="..." width="700" height="375"/>
                         </center>
                     </div>
                 </div>

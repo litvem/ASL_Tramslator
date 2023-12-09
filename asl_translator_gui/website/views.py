@@ -174,7 +174,7 @@ def translateFile(input_id):
     output.save()
     # output_file = output.output_file
     print("Before gen function")
-    gen(input_file, output_file_path)
+    generate_output(input_file, output_file_path)
     print("after gen function")
 
 
@@ -189,9 +189,7 @@ def downloadtranslation(request):
 @gzip.gzip_page
 def live(request):
     try:
-        cam = VideoCamera()
-        # Call the live video feed method and pass it to be rendered
-        return StreamingHttpResponse(gen(cam), content_type="multipart/x-mixed-replace;boundary=frame")
+        return StreamingHttpResponse(gen(), content_type="multipart/x-mixed-replace;boundary=frame")
     except:
         pass
     return render(request, 'live.html')
@@ -243,7 +241,6 @@ def draw_styled_landmarks(image, results):
                              mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2)
                              ) 
 
-# Capture video class
 class VideoCamera(object):
     def __init__(self):
         self.video = cv2.VideoCapture(0)
@@ -255,26 +252,21 @@ class VideoCamera(object):
 
     def get_frame(self):
         image = self.frame
-        #_, jpeg = cv2.imencode('.jpg', image)
-        #return jpeg.tobytes()
-        return image
+        _, jpeg = cv2.imencode('.jpg', image)
+        return jpeg.tobytes()
 
     def update(self):
         while True:
             (self.grabbed, self.frame) = self.video.read()
 
-def gen(camera, output_file):
+
+def load_model():
     # Load the model
     actions = ['nice','eat', 'teacher', 'no', 'like', 'deaf', 'sister', 'father', 'hello', 'me', 'yes', 'want', 'deaf', 'you', 'meet', 'pineapple', 
                       'thank you', 'beautiful', 'and', 'woman']
-    print(camera)
-    print(output_file)
     training = Training.objects.get(is_deployed = "True")
     deployed_model = training.model_weights
     absolute_path = os.path.abspath("media/" + str(deployed_model))
-    absolute_path_to_camera = os.path.abspath("media/" +str(camera))
-    print("The absolute path to the model ", absolute_path)
-    print("absolute path to the camera ", absolute_path_to_camera)
     # model architecture
     model = Sequential()
     model.add(LSTM(64, return_sequences=True, activation='tanh', input_shape=(29,1662)))
@@ -286,6 +278,13 @@ def gen(camera, output_file):
     model.add(Dense(np.array(actions).shape[0], activation='softmax'))
     model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
     model.load_weights(absolute_path)
+    return model, actions
+    
+
+
+def gen():
+    print("inside the gen function")
+    model, actions = load_model()
     # 1. New detection variables
     sequence = []           # placeholder for 29 frames which makes up a video/sequence
     sentence = []           # the tranlation result
@@ -293,16 +292,88 @@ def gen(camera, output_file):
     threshold = 0.5         # how confident should the resulted prediction be so that we present/use it
 
     mp_holistic = mp.solutions.holistic # Holistic model
+    
     # give the source of video - 0 for the camera and video path for uploaded videos
+    cap = cv2.VideoCapture(0)
+    # the tool we need for extracting keypoints and drawing
+    with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
+        
+        if(cap.isOpened()==False):
+            print("the camera is not open")
+            
+        while True:
+            # Process the frame (resize, preprocess, etc.)
+            ret, frame = cap.read()  
+            _, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+            
+            ret, frame = cap.read()     #reads frames every interation 
+            print("hereeeee")
+            if not ret:
+                print('failed to read frame from the video!')
+                break
+            # Make detections
+            image, results = mediapipe_detection(frame, holistic)   
+            print(results)
+            # Draw landmarks
+            draw_styled_landmarks(image, results)
+        
+            # 2. Prediction logic
+            keypoints = extract_keypoints(results)
+            sequence.insert(0,keypoints)
+            sequence = sequence[:29]
+        
+            # if we have seen 29 frames then
+            if len(sequence) == 29:
+                res = model.predict(np.expand_dims(sequence, axis=0))[0]
+                print(actions[np.argmax(res)])
+                predictions.append(np.argmax(res))
+
+            #3. Viz logic
+                if predictions and np.unique(predictions[-10:])[0]==np.argmax(res): 
+                    if res[np.argmax(res)] > threshold: 
+                        
+                        if len(sentence) > 0: 
+                            if actions[np.argmax(res)] != sentence[-1]:
+                                sentence.append(actions[np.argmax(res)])
+                        else:
+                            sentence.append(actions[np.argmax(res)])
+                            
+                    #Limit to last 5 words
+                if len(sentence) > 5: 
+                    sentence = sentence[-5:]
+
+            # Viz probabilities
+            # image = prob_viz(res, actions, image, colors)
+       
+            # draw the output on the screen
+            cv2.rectangle(image, (0,0), (640, 40), (245, 117, 16), -1)
+            cv2.putText(image, ' '.join(sentence), (3,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+
+            
+def generate_output(camera, output_file):
+    # Load the model
+    print("inside the generate_output function.")
+    model, actions = load_model()
+    # 1. New detection variables
+    sequence = []           # placeholder for 29 frames which makes up a video/sequence
+    sentence = []           # the translation result
+    predictions = []        # what the model predicts
+    threshold = 0.5         # how confident should the resulted prediction be so that we present/use it
+
+    mp_holistic = mp.solutions.holistic # Holistic model
+    # give the source of video - 0 for the camera and video path for uploaded videos
+    absolute_path_to_camera = os.path.abspath("media/" +str(camera))
     cap = cv2.VideoCapture(absolute_path_to_camera)
     # the tool we need for extracting keypoints and drawing
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
         if(cap.isOpened()==False):
             print("the camera is not open")
         while cap.isOpened():
-            ret, frame = cap.read()     #reads frames every interation 
+            ret, frame = cap.read()     #reads frames every iteration 
             print("hereeeee")
-
             if not ret:
                 print('failed to read frame from the video!')
                 break
@@ -333,24 +404,12 @@ def gen(camera, output_file):
                         else:
                             sentence.append(actions[np.argmax(res)])
 
-                # Limit to last 5 words
-                #if len(sentence) > 5: 
-                 #   sentence = sentence[-5:]
-
-            # Viz probabilities
-            #image = prob_viz(res, actions, image, colors)
-       
             # draw the output on the screen
             cv2.rectangle(image, (0,0), (640, 40), (245, 117, 16), -1)
             cv2.putText(image, ' '.join(sentence), (3,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
-            # save the result and pass it to the streem
-            # _, buffer = cv2.imencode('.jpg', image)
-            # frame_bytes = buffer.tobytes()
-            # yield (b'--frame\r\n'
-            #     b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
 
-            # Save detected words to a text file
+    # Save detected words to a text file
     with open(output_file, 'w') as file:
         # file.write(' '.join(sentence))
         file.write(str(sentence))
@@ -358,4 +417,3 @@ def gen(camera, output_file):
         
     cap.release()
     cv2.destroyAllWindows()
-            
