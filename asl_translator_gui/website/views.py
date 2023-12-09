@@ -22,6 +22,11 @@ import json
 from django.http import JsonResponse
 from datetime import date
 from tensorflow.keras.models import Sequential
+from django.core.files.base import ContentFile
+from django.core.files.base import File
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense, Dropout
+
 
 # Home
 def home(request):
@@ -141,6 +146,9 @@ def training(request):
 
 # History of user's translations
 def translations(request):
+    # Get translations for the current user
+    current_user = request.user
+    #translation_list = Translation_input.objects.get(input_id = current_user.id)
     translation_list = Translation_input.objects.all()
     # Upload file
     upload_form = UploadForm()
@@ -148,12 +156,28 @@ def translations(request):
         upload_form = UploadForm(request.POST, request.FILES)
         if upload_form.is_valid():
             instance = upload_form.save(commit=False)
-            instance.input_id = request.user    # Assign upload file with currently logged in user
+            instance.input_user = current_user    # Assign upload file with currently logged in user
             instance.save()
+            translateFile(instance.input_id)
         else:
             error_messages = upload_form.errors.values()
             return render(request, "translations.html", {'translation_list': translation_list, 'upload_form':upload_form, 'error_messages':error_messages})
     return render(request, "translations.html", {'translation_list': translation_list, 'upload_form':upload_form})
+
+# Translate file
+def translateFile(input_id):
+    input = Translation_input.objects.get(input_id = input_id)
+    input_file = input.input_file
+    print(str(input_file))
+    output_file_path = f'media/output/{input.file_name()[:-4]}.txt'
+    print(f'This is the output file in translation{output_file_path}')
+    output_file = File(open(output_file_path, 'a+'))
+    output = Translation_output(output_user=input.input_user, output_source=input, output_file=output_file_path)
+    output.save()
+    output_file = output.output_file
+    print("Before gen function")
+    gen(input_file, output_file_path)
+    print("after gen function")
 
 
 # Download file
@@ -163,17 +187,6 @@ def downloadtranslation(request):
     #filepath = base_dir + 
 ###
 
-
-# Holistics for the drawing of keypoints
-mp_holistic = mp.solutions.holistic # Holistic model
-mp_drawing = mp.solutions.drawing_utils # Drawing utilities
-# The labels/words we can predict
-# actions = np.array(['nice','eat', 'teacher', 'no', 'like', 'deaf', 'sister', 'father', 'hello', 'me', 'yes', 'want', 'deaf', 'you', 'meet', 'pineapple', 
-#                       'thank you', 'beautiful', 'and', 'woman'])
-
-# # Load the model
-# absolute_path = os.path.abspath("media/models/V_0_wtGgQyu.joblib")
-# model = load(absolute_path)
 
 @gzip.gzip_page
 def live(request):
@@ -201,6 +214,8 @@ def extract_keypoints(results):
     return np.concatenate([pose, face, lh, rh])
 
 def draw_landmarks(image, results):
+    mp_holistic = mp.solutions.holistic 
+    mp_drawing = mp.solutions.drawing_utils # Drawing utilities
     mp_drawing.draw_landmarks(image, results.face_landmarks, mp_holistic.FACE_CONNECTIONS) # Draw face connections
     mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS) # Draw pose connections
     mp_drawing.draw_landmarks(image, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS) # Draw left hand connections
@@ -208,6 +223,8 @@ def draw_landmarks(image, results):
 
 def draw_styled_landmarks(image, results):
     # Draw face connections
+    mp_holistic = mp.solutions.holistic 
+    mp_drawing = mp.solutions.drawing_utils # Drawing utilities
     mp_drawing.draw_landmarks(image, results.face_landmarks, mp_holistic.FACEMESH_TESSELATION, 
                              mp_drawing.DrawingSpec(color=(80,110,10), thickness=1, circle_radius=1), 
                              mp_drawing.DrawingSpec(color=(80,256,121), thickness=1, circle_radius=1)
@@ -227,7 +244,6 @@ def draw_styled_landmarks(image, results):
                              mp_drawing.DrawingSpec(color=(245,117,66), thickness=2, circle_radius=4), 
                              mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2)
                              ) 
-
 
 # Capture video class
 class VideoCamera(object):
@@ -249,25 +265,52 @@ class VideoCamera(object):
         while True:
             (self.grabbed, self.frame) = self.video.read()
 
-
-def gen(camera):
+def gen(camera, output_file):
+    # Load the model
+    actions = ['nice','eat', 'teacher', 'no', 'like', 'deaf', 'sister', 'father', 'hello', 'me', 'yes', 'want', 'deaf', 'you', 'meet', 'pineapple', 
+                      'thank you', 'beautiful', 'and', 'woman']
+    print(camera)
+    print(output_file)
+    training = Training.objects.get(is_deployed = "True")
+    deployed_model = training.model_weights
+    absolute_path = os.path.abspath("media/" + str(deployed_model))
+    absolute_path_to_camera = os.path.abspath("media/" +str(camera))
+    print("aboluste path to the camera ", absolute_path_to_camera)
+    # model architecture
+    model = Sequential()
+    model.add(LSTM(64, return_sequences=True, activation='tanh', input_shape=(29,1662)))
+    model.add(LSTM(128, return_sequences=True, activation='tanh'))
+    model.add(LSTM(64, return_sequences=False, activation='tanh'))
+    model.add(Dense(64, activation='relu'))
+    model.add(Dense(64, activation='relu'))
+    model.add(Dense(32, activation='relu'))
+    model.add(Dense(np.array(actions).shape[0], activation='softmax'))
+    model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
+    model.load_weights(absolute_path)
+    print("The absolute path to the model ", absolute_path)
     # 1. New detection variables
     sequence = []           # placeholder for 29 frames which makes up a video/sequence
     sentence = []           # the tranlation result
     predictions = []        # what the model predicts
-    threshold = 0.2         # how confident should the resulted prediction be so that we present/use it
+    threshold = 0.5         # how confident should the resulted prediction be so that we present/use it
 
+    mp_holistic = mp.solutions.holistic # Holistic model
     # give the source of video - 0 for the camera and video path for uploaded videos
-    #cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(absolute_path_to_camera)
     # the tool we need for extracting keypoints and drawing
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
-        while True:
-            frame = camera.get_frame()     #reads frames every interation 
-            print("hereeeee", type(frame), frame.shape)
+        if(cap.isOpened()==False):
+            print("the camera is not open")
+        while cap.isOpened():
+            ret, frame = cap.read()     #reads frames every interation 
+            print("hereeeee")
 
+            if not ret:
+                print('failed to read frame from the video!')
+                break
             # Make detections
             image, results = mediapipe_detection(frame, holistic)   
-
+            print(results)
             # Draw landmarks
             draw_styled_landmarks(image, results)
         
@@ -283,18 +326,18 @@ def gen(camera):
                 predictions.append(np.argmax(res))
 
             #3. Viz logic
-            if predictions and np.unique(predictions[-10:])[0]==np.argmax(res): 
-                if res[np.argmax(res)] > threshold: 
-                    
-                    if len(sentence) > 0: 
-                        if actions[np.argmax(res)] != sentence[-1]:
+                if predictions and np.unique(predictions[-10:])[0]==np.argmax(res): 
+                    if res[np.argmax(res)] > threshold: 
+                        
+                        if len(sentence) > 0: 
+                            if actions[np.argmax(res)] != sentence[-1]:
+                                sentence.append(actions[np.argmax(res)])
+                        else:
                             sentence.append(actions[np.argmax(res)])
-                    else:
-                        sentence.append(actions[np.argmax(res)])
 
-            # Limit to last 5 words
-            if len(sentence) > 5: 
-                sentence = sentence[-5:]
+                # Limit to last 5 words
+                #if len(sentence) > 5: 
+                 #   sentence = sentence[-5:]
 
             # Viz probabilities
             #image = prob_viz(res, actions, image, colors)
@@ -304,11 +347,17 @@ def gen(camera):
             cv2.putText(image, ' '.join(sentence), (3,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
             # save the result and pass it to the streem
-            _, buffer = cv2.imencode('.jpg', image)
-            frame_bytes = buffer.tobytes()
-            yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
+            # _, buffer = cv2.imencode('.jpg', image)
+            # frame_bytes = buffer.tobytes()
+            # yield (b'--frame\r\n'
+            #     b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
 
             # Save detected words to a text file
-            with open('media/output/translation.txt', 'w') as file:
-                file.write(' '.join(sentence))
+    with open(output_file, 'w') as file:
+        # file.write(' '.join(sentence))
+        file.write(str(sentence))
+        file.close()
+        
+    cap.release()
+    cv2.destroyAllWindows()
+            

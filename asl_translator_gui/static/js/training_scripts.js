@@ -15,7 +15,6 @@ for (i = 0; i < coll.length; i++) {
 
 /**
  * Sorts a HTML table.
- *
  * @param {HTMLTableElement} table The table to sort
  * @param {number} column The index of the column to sort
  * @param {boolean} asc Determines if the sorting will be in ascending
@@ -63,37 +62,36 @@ $('.button, .close').on('click', function(e) {
     $('.detail, html, body').toggleClass('open');
   });
 
-  document.getElementById('retrain-form').addEventListener('submit', function (event) {
-	event.preventDefault();
+document.getElementById('retrain-form').addEventListener('submit', function (event) {
+    event.preventDefault();
 
-	// Show "Retraining..." notification
-	showNotification('Retraining in progress...', 'info');
+    // Show "Retraining..." notification
+    showNotification('Retraining in progress...', 'info');
 
 	fetch(this.action, {
-		method: this.method,
-		body: new FormData(this),
-		headers: {
-			'X-CSRFToken': document.getElementsByName('csrfmiddlewaretoken')[0].value
-		}
-	})
-	.then(response => response.text())
-	.then(result => {
-		// Hide the previous notification
-		hideNotification();
+        method: this.method,
+        body: new FormData(this),
+        headers: {
+            'X-CSRFToken': document.getElementsByName('csrfmiddlewaretoken')[0].value
+        }
+        })
 
-		// Show success 
-		showNotification('Retraining successful!', 'success');
-
+    .then(response => response.text())
+    .then(result => {
+        // Hide the previous notification
+        hideNotification();
+        // Show success 
+        showNotification('Retraining successful!', 'success');
 		console.log('Result:', result);
-	})
+        })
+    
 	.catch(error => {
-		// Hide the previous notification
-		hideNotification();
-
-		// Show error notification
-		showNotification('Error during retraining!', 'error');
-		console.error('Error:', error);
-	});
+        // Hide the previous notification
+        hideNotification();
+        // Show error notification
+        showNotification('Error during retraining!', 'error');
+        console.error('Error:', error);
+    });
 });
 
 function showNotification(message, type) {
@@ -101,5 +99,6 @@ function showNotification(message, type) {
 }
 
 function hideNotification() {
-	// Add if needed
-}*/
+    // Add if needed
+}
+*/
