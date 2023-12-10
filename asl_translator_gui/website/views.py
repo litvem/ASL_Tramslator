@@ -304,6 +304,9 @@ def gen():
         while True:
             # Process the frame (resize, preprocess, etc.)
             ret, frame = cap.read()  
+            text_color = (0, 255, 255)
+            cv2.putText(frame, ' '.join(sentence), (50,50), cv2.FONT_HERSHEY_SIMPLEX, 1, text_color, 2, cv2.LINE_4)
+            cv2.imshow('OpenCV Feed', frame)
             _, buffer = cv2.imencode('.jpg', frame)
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
@@ -341,16 +344,16 @@ def gen():
                         else:
                             sentence.append(actions[np.argmax(res)])
                             
-                    #Limit to last 5 words
+                    # Limit to last 5 words
                 if len(sentence) > 5: 
                     sentence = sentence[-5:]
-
-            # Viz probabilities
-            # image = prob_viz(res, actions, image, colors)
-       
+            
+                # colors = [(245,117,16), (117,245,16), (16,117,245)]
+                # image = prob_viz(res, actions, image, colors)
             # draw the output on the screen
-            cv2.rectangle(image, (0,0), (640, 40), (245, 117, 16), -1)
-            cv2.putText(image, ' '.join(sentence), (3,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+            # cv2.rectangle(image, (0,0), (640, 40), (245, 117, 16), -1)
+            # cv2.putText(image, ' '.join(sentence), (3,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+
 
             
 def generate_output(camera, output_file):
@@ -417,3 +420,14 @@ def generate_output(camera, output_file):
         
     cap.release()
     cv2.destroyAllWindows()
+
+
+def prob_viz(res, actions, input_frame, colors):
+    output_frame = input_frame.copy()
+    num_colors = len(colors)
+    for num, prob in enumerate(res):
+        color = colors[num % num_colors]  # Use modulo to cycle through the colors
+        cv2.rectangle(output_frame, (0,60+num*40), (int(prob*100), 90+num*40), color, -1)
+        cv2.putText(output_frame, actions[num], (0, 85+num*40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2, cv2.LINE_AA)
+        
+    return output_frame
