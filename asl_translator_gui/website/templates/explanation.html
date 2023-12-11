@@ -16,7 +16,7 @@
                     <div class="col-lg-8 col-xxl-6">
                         <div class="text-center my-5">
                             <h1 class="fw-bolder mb-3">Model logic</h1>
-                            <p class="lead fw-normal text-muted mb-4">Get an inside look at how our AI model does the translation.</p>
+                            <p class="lead fw-normal text-muted mb-4">Advanced AI functionalities used in this project</p>
                         </div>
                     </div>
                 </div>
@@ -26,11 +26,19 @@
         <section class="py-5 bg-light" id="scroll-target">
             <div class="container px-5 my-5">
                 <div class="row gx-5 align-items-center">
-                    <div class="col-lg-6"><img class="img-fluid rounded mb-5 mb-lg-0" src="{% static 'assets/sign.jpg' %}" alt="..." /></div>
+                    <div class="col-lg-6"><img class="img-fluid rounded mb-5 mb-lg-0" src="{% static 'assets/explain_1.png' %}" alt="..." /></div>
                     <div class="col-lg-6">
-                        <h2 class="fw-bolder">Human perception of sign language</h2>
+                        <h2 class="fw-bolder">Using advanced AI techniques</h2>
+                        <br>
+                        <h5 class="fw-bolder">Transfer learning</h5>
                         <p class="lead fw-normal text-muted mb-0">
-                            Insert content here!!!
+                            Leveraging a pretrained machine learning model called MediaPipe for extracting meaningful features from raw video data frames to create a feature
+                            representation that is more informative and easier to use for getting the keypointers of the body when signing.
+                        </p>
+                        <br>
+                        <h5 class="fw-bolder">Deep learning techniques</h5>
+                        <p class="lead fw-normal text-muted mb-0">
+                            Using  RNN (LSTM) as an advanced AI technique for training a model for detecing sign language.
                         </p>
                     </div>
                 </div>
@@ -40,11 +48,36 @@
         <section class="py-5">
             <div class="container px-5 my-5">
                 <div class="row gx-5 align-items-center">
-                    <div class="col-lg-6 order-first order-lg-last"><img class="img-fluid rounded mb-5 mb-lg-0" src="{% static 'assets/dataset.jpg' %}" alt="..." /></div>
+                    <div class="col-lg-6 order-first order-lg-last"><img class="img-fluid rounded mb-5 mb-lg-0" src="{% static 'assets/explain_2.png' %}" alt="..." /></div>
                     <div class="col-lg-6">
-                        <h2 class="fw-bolder">AI model perception of sign language</h2>
+                        <h2 class="fw-bolder">Data processing for raw dataset</h2>
+                        <br>
+                        <h5>Special preprocessing of video data</h5>
                         <p class="lead fw-normal text-muted mb-0">
-                            Insert content here!!!
+                            We download and crop videos from dataset based on specified time intervals and then extract keypoints from frames.
+                            The keypoints are saved in NumPy arrays organized by action labels. The data is retrieved from a SQLite database, and the final processed data is 
+                            stored in specific directories.
+                        </p>
+                        
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="py-5 bg-light" id="scroll-target">
+            <div class="container px-5 my-5">
+                <div class="row gx-5 align-items-center">
+                    <div class="col-lg-6"><img class="img-fluid rounded mb-5 mb-lg-0" src="{% static 'assets/explain_3.png' %}" alt="..." /></div>
+                    <div class="col-lg-6">
+                        <h2 class="fw-bolder">Main functionalities of the system</h2>
+                        <br>
+                        <h5>Live translation</h5>
+                        <p class="lead fw-normal text-muted mb-0">
+                           The system is able to do predictions for the live signed word and display the text on the video stream.
+                        </p>
+                        <br>
+                        <h5>Translate recorded vidoes</h5>
+                        <p class="lead fw-normal text-muted mb-0">
+                            The system is able to translate the words signed in a recorded video and provide a downloadable transcript.
                         </p>
                     </div>
                 </div>
