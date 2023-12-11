@@ -102,7 +102,7 @@ def save_videos(data_point, videos_address, sequence_length, np_address, video_i
         except youtube_dl.DownloadError as e:
             print("Error during download:", e)
     # crop video
-    subprocess.run(['C:/Users/yasi7/anaconda3/pkgs/ffmpeg-4.3.1-ha925a31_0/Library/bin/ffmpeg.exe', '-y', '-i',
+    subprocess.run(['ffmpeg', '-y', '-i',
                      dir_name + "/" + "current" + ".mp4",
                      '-ss', str(start_time), '-t', str(end_time - start_time), file_name])
 
@@ -131,8 +131,8 @@ def save_videos(data_point, videos_address, sequence_length, np_address, video_i
 #gets the training data from the database
 def prepare_data(X, DATA_PATH, actions, sequence_length, videos_folder, DB_path):
     
-    last_uploaded_json_file = json.loads((Training_input.objects.latest('id').tr_input_file).read().decode('utf-8'))
-    print(Training_input.objects.latest('id').tr_input_file)
+    last_uploaded_json_file = json.loads((Training_input.objects.latest('tr_input_id').tr_input_file).read().decode('utf-8'))
+    print(Training_input.objects.latest('tr_input_id').tr_input_file)
 
     data_handler = DataHandler(db_file = os.path.abspath('data/data.db'))
     data_handler.insert_data(json_file=last_uploaded_json_file)
@@ -149,7 +149,7 @@ def prepare_data(X, DATA_PATH, actions, sequence_length, videos_folder, DB_path)
         clean_text_values = actions.tolist()
         
         #query for reading all the data ****replace "MSASL_DATA" with the name of the table that holds the data
-        query = 'SELECT * FROM RETRAINING_DATA_5 WHERE clean_text IN ({})'.format(','.join(['?'] * len(clean_text_values)))
+        query = 'SELECT * FROM RETRAINING_DATA_7 WHERE clean_text IN ({})'.format(','.join(['?'] * len(clean_text_values)))
         #executes the query 
         cursor.execute(query, clean_text_values)
 
@@ -203,7 +203,7 @@ def prepare_data(X, DATA_PATH, actions, sequence_length, videos_folder, DB_path)
         print(video_id)
 
     
-    table_name = 'RETRAINING_DATA_5'
+    table_name = 'RETRAINING_DATA_7'
     cursor.execute(f'DROP TABLE IF EXISTS {table_name}')
     
     connection.commit()
@@ -211,7 +211,7 @@ def prepare_data(X, DATA_PATH, actions, sequence_length, videos_folder, DB_path)
         cursor.execute(query, clean_text_values)
         print('hahah i could')
     except sqlite3.OperationalError as e:
-        print("the table was not deleted!", e)    
+        print("the table was deleted!", e)    
     
     connection.close()
 
@@ -219,9 +219,23 @@ def prepare_data(X, DATA_PATH, actions, sequence_length, videos_folder, DB_path)
 DATA_PATH_O = os.path.join(os.path.abspath("data/MP_Data")) 
 
 # Actions that we try to detect
-actions_O = np.array(['nice','eat', 'teacher', 'no', 'like', 'deaf', 'sister', 'father', 'hello', 'me', 'yes', 'want', 'deaf', 'you', 'meet', 'pineapple', 
-                      'thank you', 'beautiful', 'and', 'woman'])
-
+actions_O = np.array([
+    'nice',
+    'teacher',
+    'no',
+    'like',
+    'want',
+    'deaf',
+    'hello',
+    'I',
+    'yes',
+    'you',
+    'pineapple',
+    'father',
+    'thank you',
+    'beautiful',
+    'fall'
+                   ])
 # directory_path = os.path.abspath("media/input")
 # json_files = [f for f in os.listdir(directory_path) if f.endswith('.json')]
 # if json_files:

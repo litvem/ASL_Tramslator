@@ -25,6 +25,8 @@ from tensorflow.keras.models import Sequential
 from django.core.files.base import ContentFile
 from django.core.files.base import File
 from tensorflow.keras.layers import LSTM, Dense, Dropout
+from plyer import notification
+
 
 
 # Home
@@ -95,7 +97,13 @@ def logout_user(request):
 
 # Retraining functionality
 def training_functionality():
-    
+    '''
+    notification.notify(
+    title='Retraining',
+    message='The model is being retrained. Be patient!',
+    app_name='ASL',
+    )
+    '''
     data = prepareD.data_pipeline.fit_transform(None)
     ##run some tests
     data2 = data
@@ -111,9 +119,11 @@ def training_functionality():
     # abs_path = os.path.abspath("data/retrained-model")
     # dump(trained_model,f'{abs_path}.joblib'.format(random.randint(1000, 9999)))
     # dump(trained_model, f'{abs_path}/{random.randint(1000, 9999)}.joblib')
-    return trained_model,accuracy, train_accuracy
+    path_to_the_h5 = trained_model.name
+    return path_to_the_h5, accuracy, train_accuracy
     
 def training(request):
+    current_user = request.user
     training_list = Training.objects.all()
     tr_upload_form = UploadTrainingForm()
 
@@ -121,22 +131,21 @@ def training(request):
         tr_upload_form = UploadTrainingForm(request.POST, request.FILES)
 
         if tr_upload_form.is_valid():
-            uploaded_file = request.FILES['tr_input_file']
+
+            #uploaded_file = request.FILES['tr_input_file']
             instance = tr_upload_form.save(commit=False)
-            instance.tr_input_id = request.user
+            instance.tr_input_user = current_user
             instance.save()
             trained_model, accuracy, train_accuracy = training_functionality()
-            print(accuracy)
-            print(train_accuracy)
-            new_record = Training()
-            new_record.training_accuracy = int(train_accuracy)*100
-            new_record.testing_accuracy = int(accuracy)*100
-            new_record.training_date = date.today()
-            new_record.model_weights = trained_model
-            new_record.is_deployed = False
+            input = Training_input.objects.get(tr_input_id = instance.tr_input_id)
+            tr_input_file = input
+            training_date = date.today()
+            training_accuracy = int(train_accuracy * 100)
+            testing_accuracy = int(accuracy * 100)
+            model_weights = trained_model
+            is_deployed = False
+            new_record = Training(tr_input_file=tr_input_file, training_date=training_date, training_accuracy=training_accuracy, testing_accuracy=testing_accuracy, model_weights=model_weights, is_deployed=is_deployed)
             new_record.save()
-            training_list = Training.objects.all()
-            print(training_list.values())
         else:
             tr_error_messages = tr_upload_form.errors.values()
             return render(request, "training.html", {'training_list': training_list, 'tr_upload_form': tr_upload_form, 'tr_error_messages': tr_error_messages})
@@ -177,13 +186,6 @@ def translateFile(input_id):
     generate_output(input_file, output_file_path)
     print("after gen function")
 
-
-# Download file
-def downloadtranslation(request):
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    filename = "translation.txt"
-    #filepath = base_dir + 
-###
 
 
 @gzip.gzip_page
@@ -264,8 +266,23 @@ class VideoCamera(object):
 
 def load_model():
     # Load the model
-    actions = ['nice', 'teacher', 'no', 'like', 'deaf','father', 'hello', 'me', 'yes', 'want', 'deaf', 'you', 'pineapple', 
-                      'thank you', 'beautiful']
+    actions = np.array([
+    'nice',
+    'teacher',
+    'no',
+    'like',
+    'want',
+    'deaf',
+    'hello',
+    'I',
+    'yes',
+    'you',
+    'pineapple',
+    'father',
+    'thank you',
+    'beautiful',
+    'fall'
+                   ])
     training = Training.objects.get(is_deployed = "True")
     deployed_model = training.model_weights
     absolute_path = os.path.abspath("media/" + str(deployed_model))
@@ -292,7 +309,7 @@ def gen():
     sequence = []           # placeholder for 29 frames which makes up a video/sequence
     sentence = []           # the tranlation result
     predictions = []        # what the model predicts
-    threshold = 0.40         # how confident should the resulted prediction be so that we present/use it
+    threshold = 0.70       # how confident should the resulted prediction be so that we present/use it
 
     mp_holistic = mp.solutions.holistic # Holistic model
     
@@ -307,9 +324,9 @@ def gen():
             
             ret, frame = cap.read()     #reads frames every interation 
             #print("hereeeee")
-            if not ret:
-                print('failed to read frame from the video!')
-                break
+            #if not ret:
+             #   print('failed to read frame from the video!')
+              #  break
             # Make detections
             image, results = mediapipe_detection(frame, holistic)   
             print(results)
@@ -317,7 +334,7 @@ def gen():
             draw_styled_landmarks(image, results)
             
             if any([results.right_hand_landmarks, results.left_hand_landmarks]):
-            # Hands are detected, increment the frame counter
+             #Hands are detected, increment the frame counter
                 frames_since_hands += 1
             else:
             # No hands detected, reset the frame counter
@@ -326,6 +343,7 @@ def gen():
             # 2. Prediction logic
             if frames_since_hands >=3:
                 keypoints, lh, rh = extract_keypoints(results)
+                #if lh or rh:
                 sequence.append(keypoints)
                 sequence = sequence[-27:]
         
@@ -337,7 +355,7 @@ def gen():
                 predictions.append(np.argmax(res))
 
             #3. Viz logic
-                if np.unique(predictions[-4:])[0]==np.argmax(res): 
+                if np.unique(predictions[-12:])[0]==np.argmax(res): 
                     if res[np.argmax(res)] > threshold: 
                         
                         if len(sentence) > 0: 
@@ -349,7 +367,8 @@ def gen():
                     # Limit to last 5 words
                 if len(sentence) > 5: 
                     sentence = sentence[-5:]
-                # sequence = []
+
+                #sequence = []
             
             # draw the output on the screen
             text_color = (0, 255, 255)
@@ -371,7 +390,7 @@ def generate_output(camera, output_file):
     sequence = []           # placeholder for 29 frames which makes up a video/sequence
     sentence = []           # the translation result
     predictions = []        # what the model predicts
-    threshold = 0.5         # how confident should the resulted prediction be so that we present/use it
+    threshold = 0.65         # how confident should the resulted prediction be so that we present/use it
 
     mp_holistic = mp.solutions.holistic # Holistic model
     # give the source of video - 0 for the camera and video path for uploaded videos
