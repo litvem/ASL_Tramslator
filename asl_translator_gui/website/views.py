@@ -207,7 +207,9 @@ def extract_keypoints(results):
     face = np.array([[res.x, res.y, res.z] for res in results.face_landmarks.landmark]).flatten() if results.face_landmarks else np.zeros(468*3)
     lh = np.array([[res.x, res.y, res.z] for res in results.left_hand_landmarks.landmark]).flatten() if results.left_hand_landmarks else np.zeros(21*3)
     rh = np.array([[res.x, res.y, res.z] for res in results.right_hand_landmarks.landmark]).flatten() if results.right_hand_landmarks else np.zeros(21*3)
-    return np.concatenate([pose, face, lh, rh])
+    lh_has_values = any(lh)
+    rh_has_values = any(rh)
+    return np.concatenate([pose, face, lh, rh]), lh_has_values, rh_has_values
 
 def draw_landmarks(image, results):
     mp_holistic = mp.solutions.holistic 
@@ -262,14 +264,14 @@ class VideoCamera(object):
 
 def load_model():
     # Load the model
-    actions = ['nice','eat', 'teacher', 'no', 'like', 'deaf', 'sister', 'father', 'hello', 'me', 'yes', 'want', 'deaf', 'you', 'meet', 'pineapple', 
-                      'thank you', 'beautiful', 'and', 'woman']
+    actions = ['nice', 'teacher', 'no', 'like', 'deaf','father', 'hello', 'me', 'yes', 'want', 'deaf', 'you', 'pineapple', 
+                      'thank you', 'beautiful']
     training = Training.objects.get(is_deployed = "True")
     deployed_model = training.model_weights
     absolute_path = os.path.abspath("media/" + str(deployed_model))
     # model architecture
     model = Sequential()
-    model.add(LSTM(64, return_sequences=True, activation='tanh', input_shape=(29,1662)))
+    model.add(LSTM(64, return_sequences=True, activation='tanh', input_shape=(27,1662)))
     model.add(LSTM(128, return_sequences=True, activation='tanh'))
     model.add(LSTM(64, return_sequences=False, activation='tanh'))
     model.add(Dense(64, activation='relu'))
@@ -277,6 +279,7 @@ def load_model():
     model.add(Dense(32, activation='relu'))
     model.add(Dense(np.array(actions).shape[0], activation='softmax'))
     model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
+    print(absolute_path)
     model.load_weights(absolute_path)
     return model, actions
     
@@ -289,7 +292,7 @@ def gen():
     sequence = []           # placeholder for 29 frames which makes up a video/sequence
     sentence = []           # the tranlation result
     predictions = []        # what the model predicts
-    threshold = 0.5         # how confident should the resulted prediction be so that we present/use it
+    threshold = 0.40         # how confident should the resulted prediction be so that we present/use it
 
     mp_holistic = mp.solutions.holistic # Holistic model
     
@@ -297,23 +300,13 @@ def gen():
     cap = cv2.VideoCapture(0)
     # the tool we need for extracting keypoints and drawing
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
-        
-        if(cap.isOpened()==False):
-            print("the camera is not open")
             
-        while True:
+        #while True:
+        while cap.isOpened():
             # Process the frame (resize, preprocess, etc.)
-            ret, frame = cap.read()  
-            text_color = (0, 255, 255)
-            cv2.putText(frame, ' '.join(sentence), (50,50), cv2.FONT_HERSHEY_SIMPLEX, 1, text_color, 2, cv2.LINE_4)
-            cv2.imshow('OpenCV Feed', frame)
-            _, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
             
             ret, frame = cap.read()     #reads frames every interation 
-            print("hereeeee")
+            #print("hereeeee")
             if not ret:
                 print('failed to read frame from the video!')
                 break
@@ -322,20 +315,29 @@ def gen():
             print(results)
             # Draw landmarks
             draw_styled_landmarks(image, results)
+            
+            if any([results.right_hand_landmarks, results.left_hand_landmarks]):
+            # Hands are detected, increment the frame counter
+                frames_since_hands += 1
+            else:
+            # No hands detected, reset the frame counter
+                frames_since_hands = 0
         
             # 2. Prediction logic
-            keypoints = extract_keypoints(results)
-            sequence.insert(0,keypoints)
-            sequence = sequence[:29]
+            if frames_since_hands >=3:
+                keypoints, lh, rh = extract_keypoints(results)
+                sequence.append(keypoints)
+                sequence = sequence[-27:]
         
             # if we have seen 29 frames then
-            if len(sequence) == 29:
+            if len(sequence) == 27:
                 res = model.predict(np.expand_dims(sequence, axis=0))[0]
                 print(actions[np.argmax(res)])
+                print(res[np.argmax(res)])
                 predictions.append(np.argmax(res))
 
             #3. Viz logic
-                if predictions and np.unique(predictions[-10:])[0]==np.argmax(res): 
+                if np.unique(predictions[-4:])[0]==np.argmax(res): 
                     if res[np.argmax(res)] > threshold: 
                         
                         if len(sentence) > 0: 
@@ -347,12 +349,17 @@ def gen():
                     # Limit to last 5 words
                 if len(sentence) > 5: 
                     sentence = sentence[-5:]
+                # sequence = []
             
-                # colors = [(245,117,16), (117,245,16), (16,117,245)]
-                # image = prob_viz(res, actions, image, colors)
             # draw the output on the screen
-            # cv2.rectangle(image, (0,0), (640, 40), (245, 117, 16), -1)
-            # cv2.putText(image, ' '.join(sentence), (3,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+            text_color = (0, 255, 255)
+            cv2.rectangle(image, (0,0), (640, 40), (245, 117, 16), -1)
+            cv2.putText(image, ' '.join(sentence), (50,50), cv2.FONT_HERSHEY_SIMPLEX, 1, text_color, 2, cv2.LINE_4)
+            #cv2.imshow('OpenCV Feed', image)
+            _, buffer = cv2.imencode('.jpg', image)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
 
             
@@ -420,14 +427,3 @@ def generate_output(camera, output_file):
         
     cap.release()
     cv2.destroyAllWindows()
-
-
-def prob_viz(res, actions, input_frame, colors):
-    output_frame = input_frame.copy()
-    num_colors = len(colors)
-    for num, prob in enumerate(res):
-        color = colors[num % num_colors]  # Use modulo to cycle through the colors
-        cv2.rectangle(output_frame, (0,60+num*40), (int(prob*100), 90+num*40), color, -1)
-        cv2.putText(output_frame, actions[num], (0, 85+num*40), cv2.FONT_HERSHEY_SIMPLEX, 1, (255,255,255), 2, cv2.LINE_AA)
-        
-    return output_frame
