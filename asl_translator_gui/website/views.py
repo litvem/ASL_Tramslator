@@ -26,6 +26,8 @@ from django.core.files.base import ContentFile
 from django.core.files.base import File
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from plyer import notification
+from sklearn.model_selection import train_test_split
+from tensorflow.keras.utils import to_categorical
 
 
 
@@ -300,11 +302,62 @@ def load_model():
     model.load_weights(absolute_path)
     return model, actions
     
+def evaluate(model):
+    DATA_PATH_TEST = os.path.join(os.path.abspath('./data/test_set')) 
+    actions = np.array([
+    'nice',
+    'teacher',
+    'no',
+    'like',
+    'want',
+    'deaf',
+    'hello',
+    'I',
+    'yes',
+    'you',
+    'pineapple',
+    'father',
+    'thank you',
+    'beautiful',
+    'fall'
+                   ])
+    label_map = {label: num for num, label in enumerate(actions)}
+    sequences_test, labels_test = [], []
+    for action_test in actions:
+        videos = os.listdir(os.path.abspath("./data/test_set") + "/" + "{}".format(action_test))
+        if ".DS_Store" in videos:
+            videos.remove(".DS_Store")
+        for sequence in videos:
+            window = []
+            if sequence != ".DS_Store":
+                #count the number of np arrays (frames) this video has
+                number_of_f = os.listdir(os.path.abspath("./data/test_set") + "/" + "{}".format(action_test) + "/" + sequence)
+                f_size = len(number_of_f)
+
+                if f_size == 30:
+                    for frame_num in range(3, 30):
+                        res = np.load(
+                            os.path.join(DATA_PATH_TEST, action_test, sequence, "{}.npy".format(frame_num)))
+                        window.append(res)
+                    
+                sequences_test.append(window)
+                labels_test.append(label_map[action_test])
+                    
+    K = np.array(sequences_test)
+    P = to_categorical(labels_test).astype(int)
+    _, X_test_set, _, y_test_set = train_test_split(K, P, test_size=0.99)
+
+    _, goz = model.evaluate(X_test_set, y_test_set)
+    print('goz: ', goz)
+    
+
+        
 
 
 def gen():
     print("inside the gen function")
     model, actions = load_model()
+    evaluate(model)
     # 1. New detection variables
     sequence = []           # placeholder for 29 frames which makes up a video/sequence
     sentence = []           # the tranlation result
@@ -321,6 +374,7 @@ def gen():
         #while True:
         while cap.isOpened():
             # Process the frame (resize, preprocess, etc.)
+            frames_since_hands = 0
             
             ret, frame = cap.read()     #reads frames every interation 
             #print("hereeeee")
@@ -390,7 +444,7 @@ def generate_output(camera, output_file):
     sequence = []           # placeholder for 29 frames which makes up a video/sequence
     sentence = []           # the translation result
     predictions = []        # what the model predicts
-    threshold = 0.65         # how confident should the resulted prediction be so that we present/use it
+    threshold = 0.7        # how confident should the resulted prediction be so that we present/use it
 
     mp_holistic = mp.solutions.holistic # Holistic model
     # give the source of video - 0 for the camera and video path for uploaded videos
@@ -401,8 +455,8 @@ def generate_output(camera, output_file):
         if(cap.isOpened()==False):
             print("the camera is not open")
         while cap.isOpened():
+            #frames_since_hands = 0
             ret, frame = cap.read()     #reads frames every iteration 
-            print("hereeeee")
             if not ret:
                 print('failed to read frame from the video!')
                 break
@@ -412,19 +466,30 @@ def generate_output(camera, output_file):
             # Draw landmarks
             draw_styled_landmarks(image, results)
         
+            
+            if any([results.right_hand_landmarks, results.left_hand_landmarks]):
+             #Hands are detected, increment the frame counter
+                frames_since_hands += 1
+            else:
+            # No hands detected, reset the frame counter
+                frames_since_hands = 0
+            
             # 2. Prediction logic
-            keypoints = extract_keypoints(results)
-            sequence.insert(0,keypoints)
-            sequence = sequence[:29]
-        
+            if frames_since_hands >=3:
+                keypoints, lh, rh = extract_keypoints(results)
+                sequence.append(keypoints)
+                sequence = sequence[-27:]
+
             # if we have seen 29 frames then
-            if len(sequence) == 29:
+            if len(sequence) == 27:
                 res = model.predict(np.expand_dims(sequence, axis=0))[0]
                 print(actions[np.argmax(res)])
+                print(res[np.argmax(res)])
                 predictions.append(np.argmax(res))
 
+        
             #3. Viz logic
-                if predictions and np.unique(predictions[-10:])[0]==np.argmax(res): 
+                if np.unique(predictions[-15:])[0]==np.argmax(res): 
                     if res[np.argmax(res)] > threshold: 
                         
                         if len(sentence) > 0: 
