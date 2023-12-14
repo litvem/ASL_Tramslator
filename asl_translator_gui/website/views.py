@@ -151,7 +151,6 @@ def training(request):
         else:
             tr_error_messages = tr_upload_form.errors.values()
             return render(request, "training.html", {'training_list': training_list, 'tr_upload_form': tr_upload_form, 'tr_error_messages': tr_error_messages})
-
     return render(request, "training.html", {'training_list': training_list, 'tr_upload_form': tr_upload_form})
 
 # History of user's translations
@@ -173,6 +172,7 @@ def translations(request):
             error_messages = upload_form.errors.values()
             return render(request, "translations.html", {'translation_list': translation_list, 'output_list':output_list, 'upload_form':upload_form, 'error_messages':error_messages})
     return render(request, "translations.html", {'translation_list': translation_list, 'output_list':output_list, 'upload_form':upload_form})
+
 # Translate file
 def translateFile(input_id):
     input = Translation_input.objects.get(input_id = input_id)
@@ -180,15 +180,19 @@ def translateFile(input_id):
     print(str(input_file))
     output_file_path = f'media/output/{input.file_name()[:-4]}.txt'
     print(f'This is the output file in translation{output_file_path}')
-    # output_file = File(open(output_file_path, 'a+'))
     output = Translation_output(output_user=input.input_user, output_source=input, output_file=output_file_path)
     output.save()
-    # output_file = output.output_file
-    print("Before gen function")
     generate_output(input_file, output_file_path)
-    print("after gen function")
 
-
+def deploy(request, model_id):
+  training_list = Training.objects.all()
+  training = Training.objects.get(model_id=model_id)
+  active_model = Training.objects.get(is_deployed = "True")
+  active_model.is_deployed = "False"
+  active_model.save()
+  training.is_deployed = "True"
+  training.save()
+  return redirect('training')
 
 @gzip.gzip_page
 def live(request):
@@ -349,10 +353,6 @@ def evaluate(model):
 
     _, goz = model.evaluate(X_test_set, y_test_set)
     print('goz: ', goz)
-    
-
-        
-
 
 def gen():
     print("inside the gen function")
