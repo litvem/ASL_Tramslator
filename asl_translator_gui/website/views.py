@@ -102,11 +102,11 @@ def training_functionality():
     trained_model = result['model']
     accuracy = result['accuracy']
     train_accuracy = result['train_accuracy']
-    trained_model.save('asl_translator_gui/trained_models/{}.h5'.format(random.randint(1000,9999)))
+    path_to_model = 'media/models/{}.h5'.format(random.randint(1000,9999))
+    trained_model.save(path_to_model)
     print(f"accuracy {accuracy}")
     print(f" train accuracy {train_accuracy}")
-    path_to_the_h5 = trained_model.name
-    return path_to_the_h5, accuracy, train_accuracy
+    return path_to_model, accuracy, train_accuracy
     
 def training(request):
     current_user = request.user
@@ -274,7 +274,7 @@ def load_model():
                    ])
     training = Training.objects.get(is_deployed = "True")
     deployed_model = training.model_weights
-    absolute_path = os.path.abspath("media/" + str(deployed_model))
+    absolute_path = os.path.abspath(str(deployed_model))
     # Model architecture
     model = Sequential()
     model.add(LSTM(64, return_sequences=True, activation='tanh', input_shape=(27,1662)))
@@ -288,59 +288,10 @@ def load_model():
     print(absolute_path)
     model.load_weights(absolute_path)
     return model, actions
-    
-def evaluate(model):
-    DATA_PATH_TEST = os.path.join(os.path.abspath('./data/test_set')) 
-    actions = np.array([
-    'nice',
-    'teacher',
-    'no',
-    'like',
-    'want',
-    'deaf',
-    'hello',
-    'I',
-    'yes',
-    'you',
-    'pineapple',
-    'father',
-    'thank you',
-    'beautiful',
-    'fall'
-                   ])
-    label_map = {label: num for num, label in enumerate(actions)}
-    sequences_test, labels_test = [], []
-    for action_test in actions:
-        videos = os.listdir(os.path.abspath("./data/test_set") + "/" + "{}".format(action_test))
-        if ".DS_Store" in videos:
-            videos.remove(".DS_Store")
-        for sequence in videos:
-            window = []
-            if sequence != ".DS_Store":
-                # Count the number of np arrays (frames) this video has
-                number_of_f = os.listdir(os.path.abspath("./data/test_set") + "/" + "{}".format(action_test) + "/" + sequence)
-                f_size = len(number_of_f)
-
-                if f_size == 30:
-                    for frame_num in range(3, 30):
-                        res = np.load(
-                            os.path.join(DATA_PATH_TEST, action_test, sequence, "{}.npy".format(frame_num)))
-                        window.append(res)
-                    
-                sequences_test.append(window)
-                labels_test.append(label_map[action_test])
-                    
-    K = np.array(sequences_test)
-    P = to_categorical(labels_test).astype(int)
-    _, X_test_set, _, y_test_set = train_test_split(K, P, test_size=0.99)
-
-    _, goz = model.evaluate(X_test_set, y_test_set)
-    print('goz: ', goz)
-
+   
 def gen():
     print("inside the gen function")
     model, actions = load_model()
-    evaluate(model)
     # 1. New detection variables
     sequence = []           # Placeholder for 29 frames which makes up a video/sequence
     sentence = []           # Tranlation result
@@ -404,7 +355,7 @@ def gen():
             # Draw the output on the screen
             text_color = (0, 255, 255)
             cv2.rectangle(image, (0,0), (640, 40), (245, 117, 16), -1)
-            cv2.putText(image, ' '.join(sentence), (50,50), cv2.FONT_HERSHEY_SIMPLEX, 1, text_color, 2, cv2.LINE_4)
+            cv2.putText(image, ' '.join(sentence), (40,40), cv2.FONT_HERSHEY_SIMPLEX, 1, text_color, 2, cv2.LINE_4)
             _, buffer = cv2.imencode('.jpg', image)
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
