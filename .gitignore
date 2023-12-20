@@ -1,0 +1,15 @@
+# MacOS stuff
+.DS_Store
+
+# VS Code stuff
+.vscode
+
+# Jetbrains stuff
+.idea
+
+# Virtual env
+venv
+
+# Binary files
+__pycache__
+
