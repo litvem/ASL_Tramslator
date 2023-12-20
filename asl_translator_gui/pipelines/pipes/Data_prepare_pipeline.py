@@ -102,7 +102,7 @@ def save_videos(data_point, videos_address, sequence_length, np_address, video_i
         except youtube_dl.DownloadError as e:
             print("Error during download:", e)
     # crop video
-    subprocess.run(['ffmpeg', '-y', '-i',
+    subprocess.run(['C:/Users/yasi7/anaconda3/pkgs/ffmpeg-4.3.1-ha925a31_0/Library/bin/ffmpeg.exe', '-y', '-i',
                      dir_name + "/" + "current" + ".mp4",
                      '-ss', str(start_time), '-t', str(end_time - start_time), file_name])
 
@@ -149,7 +149,7 @@ def prepare_data(X, DATA_PATH, actions, sequence_length, videos_folder, DB_path)
         clean_text_values = actions.tolist()
         
         #query for reading all the data ****replace "MSASL_DATA" with the name of the table that holds the data
-        query = 'SELECT * FROM RETRAINING_DATA_7 WHERE clean_text IN ({})'.format(','.join(['?'] * len(clean_text_values)))
+        query = 'SELECT * FROM RETRAINING_DATA_8 WHERE clean_text IN ({})'.format(','.join(['?'] * len(clean_text_values)))
         #executes the query 
         cursor.execute(query, clean_text_values)
 
@@ -203,7 +203,7 @@ def prepare_data(X, DATA_PATH, actions, sequence_length, videos_folder, DB_path)
         print(video_id)
 
     
-    table_name = 'RETRAINING_DATA_7'
+    table_name = 'RETRAINING_DATA_8'
     cursor.execute(f'DROP TABLE IF EXISTS {table_name}')
     
     connection.commit()

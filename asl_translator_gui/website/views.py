@@ -102,11 +102,13 @@ def training_functionality():
     trained_model = result['model']
     accuracy = result['accuracy']
     train_accuracy = result['train_accuracy']
-    path_to_model = 'media/models/{}.h5'.format(random.randint(1000,9999))
+    suffix = random.randint(1000,9999)
+    path_to_model = 'media/models/{}.h5'.format(suffix)
     trained_model.save(path_to_model)
     print(f"accuracy {accuracy}")
     print(f" train accuracy {train_accuracy}")
-    return path_to_model, accuracy, train_accuracy
+    saved_path_in_DB = 'models/{}.h5'.format(suffix)
+    return saved_path_in_DB, accuracy, train_accuracy
     
 def training(request):
     current_user = request.user
@@ -274,7 +276,7 @@ def load_model():
                    ])
     training = Training.objects.get(is_deployed = "True")
     deployed_model = training.model_weights
-    absolute_path = os.path.abspath(str(deployed_model))
+    absolute_path = os.path.abspath('media/' + str(deployed_model))
     # Model architecture
     model = Sequential()
     model.add(LSTM(64, return_sequences=True, activation='tanh', input_shape=(27,1662)))
