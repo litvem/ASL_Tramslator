@@ -14,14 +14,32 @@ from joblib import dump, load
 import json
 from website.models import *
 from data.upload_retraining_json_to_db import DataHandler
+from sklearn.metrics import multilabel_confusion_matrix, accuracy_score
+import tensorflow as tf
 
 
 
 #path to our np arrays
 DATA_PATH = os.path.join(os.path.abspath('data/MP_Data')) 
+DATA_PATH_TEST = os.path.join(os.path.abspath('data/test_set')) 
 #list of all our labels
-actions = ['nice','eat', 'teacher', 'no', 'like', 'deaf', 'sister', 'father', 'hello', 'me', 'yes', 'want', 'deaf', 'you', 'meet', 'pineapple', 
-                      'thank you', 'beautiful', 'and', 'woman']
+actions = np.array([
+    'nice',
+    'teacher',
+    'no',
+    'like',
+    'want',
+    'deaf',
+    'hello',
+    'I',
+    'yes',
+    'you',
+    'pineapple',
+    'father',
+    'thank you',
+    'beautiful',
+    'fall'
+                   ])
 directory_path = os.path.abspath("media/input")
 
 # path_to_model_weights = None
@@ -45,7 +63,7 @@ directory_path = os.path.abspath("media/input")
 #class for the model trainer
 class TrainModelTransformer(BaseEstimator, TransformerMixin):
     #constructor for the class, gets the number of epochs, number of frames to include and the list of lebels
-    def __init__(self, actions,  target_file_count=29, epochs=10):
+    def __init__(self, actions,  target_file_count=30, epochs=1000):
         self.target_file_count = target_file_count
         self.epochs = epochs
         self.target_file_count = target_file_count
@@ -65,14 +83,14 @@ class TrainModelTransformer(BaseEstimator, TransformerMixin):
         sequences, labels = [], []
         #for all the actions and all their videos (folders of np arrays)
         
-        last_uploaded_json_file = json.loads((Training_input.objects.latest('id').tr_input_file).read().decode('utf-8'))
+        last_uploaded_json_file = json.loads((Training_input.objects.latest('tr_input_id').tr_input_file).read().decode('utf-8'))
         clean_texts = [entry.get("clean_text", "") for entry in last_uploaded_json_file]
         actions_retrain= np.array(clean_texts)
         print(actions_retrain)
         
         self.actions = actions_retrain
         
-        for action in self.actions:
+        for action in actions_retrain:
             videos = os.listdir(os.path.abspath("data/MP_Data") + "/" + "{}".format(action))
             if ".DS_Store" in videos:
                 videos.remove(".DS_Store")
@@ -87,20 +105,22 @@ class TrainModelTransformer(BaseEstimator, TransformerMixin):
                     f_size = len(number_of_f)
 
                     #if the number of frames is smaller/equal 29, get all the 29 frames and add them to the windows list
-                    if f_size <= self.target_file_count:
-                        for frame_num in range(self.target_file_count):
+                    if f_size < 27:
+                        continue
+                    elif f_size == self.target_file_count:
+                        for frame_num in range(3, self.target_file_count):
                             res = np.load(
                                 os.path.join(DATA_PATH, action, sequence, "{}.npy".format(frame_num)))
                             window.append(res)
                     #if the number of frames is 60, get every other frame 
                     elif f_size >= 60:
-                        for frame_num in range(0, f_size - 2, 2):
+                        for frame_num in range(3, f_size - 4, 2):
                             res = np.load(
                                 os.path.join(DATA_PATH, action, sequence, "{}.npy".format(frame_num)))
                             window.append(res)
                     #if the number of frames is between 29 and 60, pick 30 frames out of all available
                     else:
-                        random_numbers = random.sample(range(0, 30), self.target_file_count)
+                        random_numbers = random.sample(range(3, f_size), self.target_file_count)
                         random_numbers.sort()
                         for frame_num in random_numbers:
                             res = np.load(
@@ -109,8 +129,33 @@ class TrainModelTransformer(BaseEstimator, TransformerMixin):
 
                     sequences.append(window)
                     labels.append(label_map[action])
-    
 
+        
+
+
+        sequences_test, labels_test = [], []
+        for action_test in self.actions:
+            videos = os.listdir(os.path.abspath("data/test_set") + "/" + "{}".format(action_test))
+            if ".DS_Store" in videos:
+                videos.remove(".DS_Store")
+            for sequence in videos:
+                window = []
+                if sequence != ".DS_Store":
+                    #count the number of np arrays (frames) this video has
+                    number_of_f = os.listdir(os.path.abspath("data/test_set") + "/" + "{}".format(action_test) + "/" + sequence)
+                    f_size = len(number_of_f)
+
+                    if f_size == self.target_file_count:
+                        for frame_num in range(3, self.target_file_count):
+                            res = np.load(
+                                os.path.join(DATA_PATH_TEST, action_test, sequence, "{}.npy".format(frame_num)))
+                            window.append(res)
+                    
+                    sequences_test.append(window)
+                    labels_test.append(label_map[action_test])
+
+    
+        print(len(labels_test))
         #make a np array of all the sequences
         Z = np.array(sequences)
         #make the labels catagorical
@@ -118,23 +163,22 @@ class TrainModelTransformer(BaseEstimator, TransformerMixin):
         #split the data into train and test set with 80-20% ratio
         X_train, X_test, y_train, y_test = train_test_split(Z, y, test_size=0.2)
 
-
+        K = np.array(sequences_test)
+        P = to_categorical(labels_test).astype(int)
+        _, X_test_set, _, y_test_set = train_test_split(K, P, test_size=0.99)
+        print(X_test_set.shape)
+        print(y_test_set.shape)
+        print(label_map)
         
         #model's architecture
         self.model = Sequential()
-        self.model.add(LSTM(64, return_sequences=True, activation='tanh', input_shape=(29,1662)))
-        #self.model.add(Dropout(0.2))
+        self.model.add(LSTM(64, return_sequences=True, activation='tanh', input_shape=(27,1662)))
         self.model.add(LSTM(128, return_sequences=True, activation='tanh'))
-        #self.model.add(Dropout(0.2))
         self.model.add(LSTM(64, return_sequences=False, activation='tanh'))
-       # self.model.add(Dropout(0.2))
         self.model.add(Dense(64, activation='relu'))
-        #self.model.add(Dropout(0.2))
         self.model.add(Dense(64, activation='relu'))
-       # self.model.add(Dropout(0.2))
         self.model.add(Dense(32, activation='relu'))
-        #self.model.add(Dropout(0.2))
-        self.model.add(Dense(np.array(self.actions).shape[0], activation='softmax'))
+        self.model.add(Dense(self.actions.shape[0], activation='softmax'))
 
         #compile the model and fit
         self.model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
@@ -144,17 +188,32 @@ class TrainModelTransformer(BaseEstimator, TransformerMixin):
         path_to_model_weights = str(Last_deployed_model.model_weights)
         print(path_to_model_weights)
         abs_path_to_model_weights = os.path.abspath("media/"+ path_to_model_weights)
+        print(abs_path_to_model_weights)
         # path_to_model_weights = "C:/Users/yasi7/Downloads/data/gui_new/ASL-translator/asl_translator_gui/media/models/actions_solution_20l_v0_1.h5"
         
-        self.model.load_weights(abs_path_to_model_weights)
+        #self.model.load_weights(abs_path_to_model_weights)
+        self.model = tf.keras.models.load_model(os.path.abspath("media/models/"+ "MyModel_tf"))
+
+        _, goz = self.model.evaluate(X_test_set, y_test_set)
+        print('goz: ', goz)
+
         self.model.fit(X_train, y_train, epochs=self.epochs, callbacks=[tb_callback])
         
-        # Evaluate the model on the test set
-        _, self.accuracy = self.model.evaluate(X_test, y_test)
-        print("Model Accuracy on test set:", self.accuracy)
 
+        yhat = self.model.predict(X_test_set)
+
+        ytrue = np.argmax(y_test_set, axis=1).tolist()
+        yhat = np.argmax(yhat, axis=1).tolist()
+
+        
         # Evaluate the model on the train set
         _, self.train_accuracy = self.model.evaluate(X_train, y_train)
+
+        # Evaluate the model on the test set
+        self.accuracy = accuracy_score(ytrue, yhat)
+        #self.accuracy = self.train_accuracy - 0.05
+        print("Model Accuracy on test set:", self.accuracy)
+
         print("Model Accuracy on train set:", self.train_accuracy)
         return self
 
@@ -167,17 +226,15 @@ class TrainModelTransformer(BaseEstimator, TransformerMixin):
         for file_name in files_in_MP_Data:
             file_path = os.path.join(path_to_MP_Data, file_name)
             try:
-                if os.path.isfile(file_path):
-                    os.remove(file_path)
-                    print(f"Deleted: {file_path}")
+                os.rmdir(file_path)
+                print(f"Deleted: {file_path}")
             except Exception as e:
                 print(f"Error deleting {file_path}: {e}")
         for file_name in files_in_videos:
             file_path = os.path.join(path_to_MP_Data, file_name)
             try:
-                if os.path.isfile(file_path):
-                    os.remove(file_path)
-                    print(f"Deleted: {file_path}")
+                os.rmdir(file_path)
+                print(f"Deleted: {file_path}")
             except Exception as e:
                 print(f"Error deleting {file_path}: {e}")
         return {'model': self.model, 'accuracy': self.accuracy, 'train_accuracy': self.train_accuracy}
@@ -185,7 +242,7 @@ class TrainModelTransformer(BaseEstimator, TransformerMixin):
 
 
 train_pipeline = Pipeline([
-    ('preprocessAndFit', TrainModelTransformer(actions=actions,target_file_count=29, epochs=100))
+    ('preprocessAndFit', TrainModelTransformer(actions=actions,target_file_count=30, epochs=1000))
 ])
 
 #runs the pipeline ****for testing, comment later***** 

@@ -34,11 +34,12 @@ class Translation_output(models.Model):
 
 # Training input
 class Training_input(models.Model):
-    tr_input_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    tr_input_id = models.AutoField(primary_key=True)
+    tr_input_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     tr_input_file = models.FileField(upload_to="input/", null=True, default={}, validators=[validate_json])
 
     def __str__(self):
-        return f'Training_input - ID: {self.id}, User: {self.tr_input_id.username}'
+        return f'Training_input - ID: {self.tr_input_id}, User: {self.tr_input_user}'
 
 
 # Training

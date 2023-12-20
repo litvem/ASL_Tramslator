@@ -62,7 +62,7 @@
                                 {% if training.is_deployed %}
                                     <button class='btn btn-success' disabled>Deployed</button>
                                 {% else %}
-                                    <a class='btn btn-dark' href='#'>Deploy</a>
+                                    <a href="deploy/{{ training.model_id}}" class='btn btn-dark' '>Deploy</a>
                                 {% endif %}
                             </td>
                         </tr>

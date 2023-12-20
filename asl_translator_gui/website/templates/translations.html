@@ -81,17 +81,8 @@
                             <img src="{% static 'assets/upload_icon.png' %}" alt="cloud">
                         </div>
                         {{ upload_form.as_p }}
-                        <button id="upload-button">Upload</button>
+                        <button id="upload-button" type="submit">Upload</button>
                     </form>
-                </div>
-            </div>
-        </div>
-        <!-- Success modal/popup -->
-        <div class="modal fade" id="sucess-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" area-hidden="true">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" area-label="Close"></button>
-                    <p>Your file has been translated successfully and transcript is available for download.</p>
                 </div>
             </div>
         </div>
