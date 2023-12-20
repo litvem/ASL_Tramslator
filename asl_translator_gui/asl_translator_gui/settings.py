@@ -117,8 +117,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = "static/"
-STATICFILES_DIRS = ["static/"]
+# STATIC_URL = "static/"
+# STATICFILES_DIRS = ["static/"]
+STATIC_URL = "/static/"
+STATICFILES_DIRS = ["website/static/"]
+# Set the directory where Django will collect static files during deployment
+STATIC_ROOT = "/app/static/"
 
 # Uploaded media files (e.g., videos) are stored in media folder
 

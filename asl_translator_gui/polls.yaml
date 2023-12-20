@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: web
+        image: docker.io/gusfazya/asl-app:01
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_URL
+          value: sqlite:///app/db.sqlite3
+        volumeMounts:
+        - name: db-storage
+          mountPath: /data
+          subPath: db.sqlite3
+        - name: media-storage
+          mountPath: /media
+        resources:  # Added resource requests and limits
+          requests:
+            memory: "64Gi"
+          limits:
+            memory: "64Gi"
+      volumes:
+        - name: static-storage
+          emptyDir: {}
+        - name: media-storage
+          persistentVolumeClaim:
+            claimName: media-pvc
+        - name: db-storage
+          persistentVolumeClaim:
+            claimName: db-pvc
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-service
+spec:
+  selector:
+    app: web
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: LoadBalancer
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: db-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: media-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
