@@ -236,33 +236,6 @@ actions_O = np.array([
     'beautiful',
     'fall'
                    ])
-# directory_path = os.path.abspath("media/input")
-# json_files = [f for f in os.listdir(directory_path) if f.endswith('.json')]
-# if json_files:
-#     print("found a json file!!")
-#     # Get the full paths of the JSON files
-#     json_paths = [os.path.join(directory_path, f) for f in json_files]
-#     print("Done")
-#     # Find the newest JSON file based on modification time
-#     newest_json_path = max(json_paths, key=os.path.getmtime)
-#     print("this is the newest path")
-#     with open(newest_json_path, 'r') as file:
-#         # Load the JSON data
-#         json_data = json.load(file)
-#     print("got the json data")
-#     clean_texts = [entry.get("clean_text", "") for entry in json_data]
-#     print(clean_texts)
-#     actions_O = np.array(clean_texts)
-#     print(actions_O)
-
-# last_uploaded_json_file = json.loads((Training_input.objects.latest('id').tr_input_file).read().decode('utf-8'))
-# print(Training_input.objects.latest('id').tr_input_file)
-
-# data_handler = DataHandler(db_file = os.path.abspath('data/data.db'))
-# data_handler.insert_data(json_file=last_uploaded_json_file)
-# clean_texts = [entry.get("clean_text", "") for entry in last_uploaded_json_file]
-# actions_O = np.array(clean_texts)
-# print(actions_O)
 
 # Videos are going to be 60 frames in length
 sequence_length_O = 60
