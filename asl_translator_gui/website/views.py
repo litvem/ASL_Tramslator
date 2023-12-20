@@ -357,7 +357,7 @@ def gen():
         # while True:
         while cap.isOpened():
             # Process the frame (resize, preprocess, etc.)
-            frames_since_hands = 0
+            #frames_since_hands = 0
             # Reads frames every interation 
             ret, frame = cap.read()
             # Make detections
