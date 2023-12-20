@@ -12,6 +12,7 @@ urlpatterns = [
     path("live/", views.live, name="live"),
     path("translations/", views.translations, name="translations"),
     path("explanation/", views.project_explanation, name = "explanation"),
+    path('training/deploy/<int:model_id>', views.deploy, name='deploy'),
 ]
 
 #To handle media types
