@@ -8,24 +8,18 @@ import pipelines.pipes.Data_prepare_pipeline as prepareD
 import pipelines.pipes.training_pipeline as trainM
 from .models import *
 from .forms import *
-from joblib import dump, load
-import sqlite3
-from django.core.files.storage import FileSystemStorage
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.http import HttpResponse, StreamingHttpResponse
+from django.http import StreamingHttpResponse
 from django.views.decorators import gzip
 from data.upload_retraining_json_to_db import DataHandler
-import json
-from django.http import JsonResponse
 from datetime import date
 from tensorflow.keras.models import Sequential
 from django.core.files.base import ContentFile
 from django.core.files.base import File
 from tensorflow.keras.layers import LSTM, Dense, Dropout
-from plyer import notification
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.utils import to_categorical
 
@@ -58,7 +52,7 @@ def register_user(request):
             messages.success(request, ("You have been registered successfully."))
             return redirect("home")
         else:
-            messages.success(request, ("There was an error. Please try to again."))
+            messages.warning(request, ("There was an error. Please try to again."))
             return redirect("register")
     else:
         return render(request, "register.html", {'user_form':user_form})
@@ -77,13 +71,14 @@ def login_user(request):
         if user is not None:
             login(request, user)
             messages.success(request, ("You have been logged in."))
+            # Redirect admin and regular user to different webpages
             if user.is_superuser:
                 return redirect('training')
             else:
                 return redirect('translations')
         # Redirect if login was not successful 
         else:
-            messages.success(request, ("There was an error. Please try to again."))
+            messages.warning(request, ("Username or password is incorrect. Please try again."))
             return redirect('login')
     # If the form was not filled in, show the login page    
     else:
@@ -99,13 +94,6 @@ def logout_user(request):
 
 # Retraining functionality
 def training_functionality():
-    '''
-    notification.notify(
-    title='Retraining',
-    message='The model is being retrained. Be patient!',
-    app_name='ASL',
-    )
-    '''
     data = prepareD.data_pipeline.fit_transform(None)
     ##run some tests
     data2 = data
@@ -115,12 +103,8 @@ def training_functionality():
     accuracy = result['accuracy']
     train_accuracy = result['train_accuracy']
     trained_model.save('asl_translator_gui/trained_models/{}.h5'.format(random.randint(1000,9999)))
-    # abs_path = os.path.abspath('models')
     print(f"accuracy {accuracy}")
     print(f" train accuracy {train_accuracy}")
-    # abs_path = os.path.abspath("data/retrained-model")
-    # dump(trained_model,f'{abs_path}.joblib'.format(random.randint(1000, 9999)))
-    # dump(trained_model, f'{abs_path}/{random.randint(1000, 9999)}.joblib')
     path_to_the_h5 = trained_model.name
     return path_to_the_h5, accuracy, train_accuracy
     
@@ -128,13 +112,10 @@ def training(request):
     current_user = request.user
     training_list = Training.objects.all()
     tr_upload_form = UploadTrainingForm()
-
     if request.method == 'POST':
+        # Upload form
         tr_upload_form = UploadTrainingForm(request.POST, request.FILES)
-
         if tr_upload_form.is_valid():
-
-            #uploaded_file = request.FILES['tr_input_file']
             instance = tr_upload_form.save(commit=False)
             instance.tr_input_user = current_user
             instance.save()
@@ -148,17 +129,19 @@ def training(request):
             is_deployed = False
             new_record = Training(tr_input_file=tr_input_file, training_date=training_date, training_accuracy=training_accuracy, testing_accuracy=testing_accuracy, model_weights=model_weights, is_deployed=is_deployed)
             new_record.save()
+            messages.info(request, ("Model retraining is completed successfully."))
         else:
             tr_error_messages = tr_upload_form.errors.values()
             return render(request, "training.html", {'training_list': training_list, 'tr_upload_form': tr_upload_form, 'tr_error_messages': tr_error_messages})
     return render(request, "training.html", {'training_list': training_list, 'tr_upload_form': tr_upload_form})
 
+
 # History of user's translations
 def translations(request):
     # Get translations for the current user
     current_user = request.user
-    translation_list = Translation_input.objects.all()
-    output_list = Translation_output.objects.all()  
+    translation_list = Translation_input.objects.filter(input_user__exact=current_user)
+    output_list = Translation_output.objects.filter(output_user__exact=current_user)
     # Upload file
     upload_form = UploadForm()
     if request.method == "POST":
@@ -168,6 +151,7 @@ def translations(request):
             instance.input_user = current_user    # Assign upload file with currently logged in user
             instance.save()
             translateFile(instance.input_id)
+            messages.info(request, ("Your file has been translated successfully."))
         else:
             error_messages = upload_form.errors.values()
             return render(request, "translations.html", {'translation_list': translation_list, 'output_list':output_list, 'upload_form':upload_form, 'error_messages':error_messages})
@@ -177,7 +161,6 @@ def translations(request):
 def translateFile(input_id):
     input = Translation_input.objects.get(input_id = input_id)
     input_file = input.input_file
-    print(str(input_file))
     output_file_path = f'media/output/{input.file_name()[:-4]}.txt'
     print(f'This is the output file in translation{output_file_path}')
     output = Translation_output(output_user=input.input_user, output_source=input, output_file=output_file_path)
@@ -203,11 +186,11 @@ def live(request):
     return render(request, 'live.html')
 
 def mediapipe_detection(image, model):
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # COLOR CONVERSION BGR 2 RGB
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) # Color conversion BGR to RGB
     image.flags.writeable = False                  # Image is no longer writeable
     results = model.process(image)                 # Make prediction
     image.flags.writeable = True                   # Image is now writeable 
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) # COLOR COVERSION RGB 2 BGR
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) # Color conversion RGB to BGR
     return image, results
 
 def extract_keypoints(results):
@@ -292,7 +275,7 @@ def load_model():
     training = Training.objects.get(is_deployed = "True")
     deployed_model = training.model_weights
     absolute_path = os.path.abspath("media/" + str(deployed_model))
-    # model architecture
+    # Model architecture
     model = Sequential()
     model.add(LSTM(64, return_sequences=True, activation='tanh', input_shape=(27,1662)))
     model.add(LSTM(128, return_sequences=True, activation='tanh'))
@@ -334,7 +317,7 @@ def evaluate(model):
         for sequence in videos:
             window = []
             if sequence != ".DS_Store":
-                #count the number of np arrays (frames) this video has
+                # Count the number of np arrays (frames) this video has
                 number_of_f = os.listdir(os.path.abspath("./data/test_set") + "/" + "{}".format(action_test) + "/" + sequence)
                 f_size = len(number_of_f)
 
@@ -359,28 +342,24 @@ def gen():
     model, actions = load_model()
     evaluate(model)
     # 1. New detection variables
-    sequence = []           # placeholder for 29 frames which makes up a video/sequence
-    sentence = []           # the tranlation result
-    predictions = []        # what the model predicts
-    threshold = 0.70       # how confident should the resulted prediction be so that we present/use it
+    sequence = []           # Placeholder for 29 frames which makes up a video/sequence
+    sentence = []           # Tranlation result
+    predictions = []        # What the model predicts
+    threshold = 0.70        # How confident should the resulted prediction be so that we present/use it
 
     mp_holistic = mp.solutions.holistic # Holistic model
     
-    # give the source of video - 0 for the camera and video path for uploaded videos
+    # Give the source of video - 0 for the camera and video path for uploaded videos
     cap = cv2.VideoCapture(0)
-    # the tool we need for extracting keypoints and drawing
+    # Tool we need for extracting keypoints and drawing
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
             
-        #while True:
+        # while True:
         while cap.isOpened():
             # Process the frame (resize, preprocess, etc.)
             frames_since_hands = 0
-            
-            ret, frame = cap.read()     #reads frames every interation 
-            #print("hereeeee")
-            #if not ret:
-             #   print('failed to read frame from the video!')
-              #  break
+            # Reads frames every interation 
+            ret, frame = cap.read()
             # Make detections
             image, results = mediapipe_detection(frame, holistic)   
             print(results)
@@ -388,7 +367,7 @@ def gen():
             draw_styled_landmarks(image, results)
             
             if any([results.right_hand_landmarks, results.left_hand_landmarks]):
-             #Hands are detected, increment the frame counter
+             # Hands are detected, increment the frame counter
                 frames_since_hands += 1
             else:
             # No hands detected, reset the frame counter
@@ -397,11 +376,11 @@ def gen():
             # 2. Prediction logic
             if frames_since_hands >=3:
                 keypoints, lh, rh = extract_keypoints(results)
-                #if lh or rh:
+                # If lh or rh:
                 sequence.append(keypoints)
                 sequence = sequence[-27:]
         
-            # if we have seen 29 frames then
+            # If we have seen 29 frames then
             if len(sequence) == 27:
                 res = model.predict(np.expand_dims(sequence, axis=0))[0]
                 print(actions[np.argmax(res)])
@@ -421,14 +400,11 @@ def gen():
                     # Limit to last 5 words
                 if len(sentence) > 5: 
                     sentence = sentence[-5:]
-
-                #sequence = []
             
-            # draw the output on the screen
+            # Draw the output on the screen
             text_color = (0, 255, 255)
             cv2.rectangle(image, (0,0), (640, 40), (245, 117, 16), -1)
             cv2.putText(image, ' '.join(sentence), (50,50), cv2.FONT_HERSHEY_SIMPLEX, 1, text_color, 2, cv2.LINE_4)
-            #cv2.imshow('OpenCV Feed', image)
             _, buffer = cv2.imencode('.jpg', image)
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
@@ -441,22 +417,21 @@ def generate_output(camera, output_file):
     print("inside the generate_output function.")
     model, actions = load_model()
     # 1. New detection variables
-    sequence = []           # placeholder for 29 frames which makes up a video/sequence
-    sentence = []           # the translation result
-    predictions = []        # what the model predicts
-    threshold = 0.7        # how confident should the resulted prediction be so that we present/use it
+    sequence = []           # Placeholder for 29 frames which makes up a video/sequence
+    sentence = []           # Translation result
+    predictions = []        # What the model predicts
+    threshold = 0.7         # How confident should the resulted prediction be so that we present/use it
 
     mp_holistic = mp.solutions.holistic # Holistic model
-    # give the source of video - 0 for the camera and video path for uploaded videos
+    # Give the source of video - 0 for the camera and video path for uploaded videos
     absolute_path_to_camera = os.path.abspath("media/" +str(camera))
     cap = cv2.VideoCapture(absolute_path_to_camera)
-    # the tool we need for extracting keypoints and drawing
+    # Tool we need for extracting keypoints and drawing
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
         if(cap.isOpened()==False):
             print("the camera is not open")
         while cap.isOpened():
-            #frames_since_hands = 0
-            ret, frame = cap.read()     #reads frames every iteration 
+            ret, frame = cap.read()     # Reads frames every iteration 
             if not ret:
                 print('failed to read frame from the video!')
                 break
@@ -468,7 +443,7 @@ def generate_output(camera, output_file):
         
             
             if any([results.right_hand_landmarks, results.left_hand_landmarks]):
-             #Hands are detected, increment the frame counter
+             # Hands are detected, increment the frame counter
                 frames_since_hands += 1
             else:
             # No hands detected, reset the frame counter
@@ -498,14 +473,13 @@ def generate_output(camera, output_file):
                         else:
                             sentence.append(actions[np.argmax(res)])
 
-            # draw the output on the screen
+            # Draw the output on the screen
             cv2.rectangle(image, (0,0), (640, 40), (245, 117, 16), -1)
             cv2.putText(image, ' '.join(sentence), (3,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
 
     # Save detected words to a text file
     with open(output_file, 'w') as file:
-        # file.write(' '.join(sentence))
         file.write(str(sentence))
         file.close()
         
