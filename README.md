@@ -1,9 +1,9 @@
-## Name
-ASL translator tool
+## Project name
+**ASL Translator tool**
 
 ## Description
-The ASL translator is an advanced technological tool that leverages deep learning and computer vision techniques by using a camera to detect ASL gestures, including movements of hands, head, and facial expression, and translating them to written text, either in real-time, or based on a pre-recorded video file.
-At the same time, the ASL translator provides a restricted access section, accessible only using administrator credentials, which is used to manage the translation model. In this section, the site administrators can see data about existing trained models (i.e. date of training, and train and test accuracy), can select which model is currency active, and have the ability to train a new model by providing additional data points.
+The **ASL Translator** is an advanced technological tool that leverages deep learning and computer vision techniques by using a camera to detect ASL gestures, including movements of hands, head, and facial expression, and translating them to written text, either in real-time, or based on a pre-recorded video file.<br>
+At the same time, the ASL translator provides a restricted access section, accessible only using administrator credentials, which is used to manage the translation model. In this section, the site administrators can see data about existing trained models (i.e. date of training, and train and test accuracy), can select which model is currency active, and have the ability to train a new model by providing additional data points. <br>
 This tool is designed to facilitate communication for individuals who are hard of hearing with others who are not familiar with sign language. We use an LSTM deep learning model for designing this tool and the model is trained with [MS-ASL Dataset](https://www.microsoft.com/en-us/download/details.aspx?id=100121). 
 
 ## Tech stack
@@ -16,10 +16,10 @@ This tool is designed to facilitate communication for individuals who are hard o
 - [Matplotlib](https://matplotlib.org/)
 - [Mediapipe](https://developers.google.com/mediapipe)
 - [Ffmpeg](https://pypi.org/project/python-ffmpeg/)
+- [Jsonschema](https://python-jsonschema.readthedocs.io/en/latest/validate/)
 
 
 ## Dataset
-
 We are utilizing the [MS-ASL Dataset](https://www.microsoft.com/en-us/download/details.aspx?id=100121) dataset as our data source, which comprises three JSON files containing training, validation, and test sets. The sizes of these sets are 16054, 5287, and 4172, respectively. However, we have discovered that only roughly 70% of the data set is usable, due to a number of the source videos being made private.
 The dataset also includes a comprehensive list of classes representing the words to be identified. Furthermore, a list of synonyms is provided, to enable the model to consider alternative words with similar meanings. Each data point is in the format shown below:
 
@@ -28,13 +28,15 @@ The dataset also includes a comprehensive list of classes representing the words
 As shown, each data point comes with a URL to a video of a person performing the corresponding sign. Other data such as the length, start time, end time, bounding boxes, etc. are also provided.
 
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+## Interactions with the system
+### Retraining workflow
+![Retraining workflow](/img/retraining_flow.png)
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+### Translation workflow
+![Translation workflow](/img/translation_flow.png)
 
-## Diagrams
+## Database schema
+![Database schema](/img/db_schema.png)
 
 ## Installation guide
 
@@ -67,15 +69,15 @@ python manage.py runserver
 
 The application is deployed on Kubernetes engine on Google cloud. To access the website follow this link: http://34.140.181.224:80
 
-The admin account credentials:
-- Usename: admin
-- Password: winter2024
+The **admin account** credentials:
+- <ins>Usename:</ins> admin
+- <ins>Password:</ins> winter2024
 
-In case by the time you are testing this, the website is down for running out of free credits we have from Google cloud, [here](https://www.youtube.com/watch?v=MaJpswi22UE) we provide you a video of the website deployed so that you can see the functionality. Note that the website is on a HTTP protocol, is not considered safe for your browser. Hence, the the browser will not allow you to use your camera and consequently not the live translation functionality. However, these workarounds might work on allowing the website to use your camera. The instructions below are provided only for Google Chrome browser:
-1. Go to: chrome://flags/#unsafely-treat-insecure-origin-as-secure
+In case by the time you are testing this, the website is down for running out of free credits we have from Google cloud, [here](https://www.youtube.com/watch?v=MaJpswi22UE) we provide you a video of the website deployed so that you can see the functionality. Note that the website is on a HTTP protocol, is not considered safe for your browser. Hence, the the browser will not allow you to use your camera and consequently not the live translation functionality. However, these workarounds might work on allowing the website to use your camera. The instructions below are provided <ins>only</ins> for Google Chrome browser:
+1. Go to: **chrome://flags/#unsafely-treat-insecure-origin-as-secure**
 2. Enable Insecure origins treated as secure
 3. Add the addresses for which you want to ignore this policy: http://34.140.181.224/live/
-4. Restart chrome
+4. Restart Chrome
 
 For that the following steps have been taken. Note that the required files and correct project structure is in "cloud-deployment" branch.
 
@@ -131,6 +133,7 @@ kubectl apply -f polls.yaml
 - Patrik Samcenko @samcenko
 - Amin Mahmoudifard @aminmah
 
-For a detailed breakdown of our contributions, visit our [wiki](https://git.chalmers.se/courses/dit826/2023/group2/ASL-translator/-/wikis/Group-Responsibilities) pages.
+For a detailed breakdown of our contributions, visit this [wiki](https://git.chalmers.se/courses/dit826/2023/group2/ASL-translator/-/wikis/Group-Responsibilities) page.
+
 ## License
 [MIT license](https://git.chalmers.se/courses/dit826/2023/group2/ASL-translator/-/blob/cloud-deployment/LICENSE)
