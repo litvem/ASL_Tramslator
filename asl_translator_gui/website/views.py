@@ -22,7 +22,39 @@ from django.core.files.base import File
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.utils import to_categorical
+import json
+from jsonschema import validate, ValidationError
 
+json_schema = {
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "org_text": {"type": "string"},
+            "clean_text": {"type": "string"},
+            "start_time": {"type": "number"},
+            "signer_id": {"type": "integer"},
+            "signer": {"type": "integer"},
+            "start": {"type": "integer"},
+            "end": {"type": "integer"},
+            "file": {"type": "string"},
+            "label": {"type": "integer"},
+            "height": {"type": "number"},
+            "fps": {"type": "number"},
+            "end_time": {"type": "number"},
+            "url": {"type": "string"},
+            "text": {"type": "string"},
+            "box": {
+                "type": "array",
+                "items": {"type": "number"},
+                "minItems": 4,
+                "maxItems": 4
+            },
+            "width": {"type": "number"}
+        },
+        "required": ["org_text", "clean_text", "start_time", "signer_id", "signer", "start", "end", "file", "label", "height", "fps", "end_time", "url", "text", "box", "width"]
+    }
+}
 
 
 # Home
@@ -92,23 +124,39 @@ def logout_user(request):
     return redirect('home')
 
 
+def validate_json(json_data, schema):
+    try:
+        validate(instance=json_data, schema=schema)
+        print("Validation successful. JSON adheres to the schema.")
+    except ValidationError as e:
+        print(f"Validation error: {e}")
+        return False
+    return True
+
 # Retraining functionality
 def training_functionality():
-    data = prepareD.data_pipeline.fit_transform(None)
-    ##run some tests
-    data2 = data
-    result = trainM.train_pipeline.fit_transform(None)
+    last_uploaded_json_file = json.loads((Training_input.objects.latest('tr_input_id').tr_input_file).read().decode('utf-8'))
+    print(Training_input.objects.latest('tr_input_id').tr_input_file)
+    is_valid = validate_json(last_uploaded_json_file, json_schema)
 
-    trained_model = result['model']
-    accuracy = result['accuracy']
-    train_accuracy = result['train_accuracy']
-    suffix = random.randint(1000,9999)
-    path_to_model = 'media/models/{}.h5'.format(suffix)
-    trained_model.save(path_to_model)
-    print(f"accuracy {accuracy}")
-    print(f" train accuracy {train_accuracy}")
-    saved_path_in_DB = 'models/{}.h5'.format(suffix)
-    return saved_path_in_DB, accuracy, train_accuracy
+    if is_valid:
+        data = prepareD.data_pipeline.fit_transform(None)
+        ##run some tests
+        data2 = data
+        result = trainM.train_pipeline.fit_transform(None)
+
+        trained_model = result['model']
+        accuracy = result['accuracy']
+        train_accuracy = result['train_accuracy']
+        suffix = random.randint(1000,9999)
+        path_to_model = 'media/models/{}.h5'.format(suffix)
+        trained_model.save(path_to_model)
+        print(f"accuracy {accuracy}")
+        print(f" train accuracy {train_accuracy}")
+        saved_path_in_DB = 'models/{}.h5'.format(suffix)
+        return saved_path_in_DB, accuracy, train_accuracy
+    else:
+        return None, None, None
     
 def training(request):
     current_user = request.user
@@ -122,16 +170,19 @@ def training(request):
             instance.tr_input_user = current_user
             instance.save()
             trained_model, accuracy, train_accuracy = training_functionality()
-            input = Training_input.objects.get(tr_input_id = instance.tr_input_id)
-            tr_input_file = input
-            training_date = date.today()
-            training_accuracy = int(train_accuracy * 100)
-            testing_accuracy = int(accuracy * 100)
-            model_weights = trained_model
-            is_deployed = False
-            new_record = Training(tr_input_file=tr_input_file, training_date=training_date, training_accuracy=training_accuracy, testing_accuracy=testing_accuracy, model_weights=model_weights, is_deployed=is_deployed)
-            new_record.save()
-            messages.info(request, ("Model retraining is completed successfully."))
+            if trained_model is not None and accuracy is not None and train_accuracy is not None:
+                input = Training_input.objects.get(tr_input_id = instance.tr_input_id)
+                tr_input_file = input
+                training_date = date.today()
+                training_accuracy = int(train_accuracy * 100)
+                testing_accuracy = int(accuracy * 100)
+                model_weights = trained_model
+                is_deployed = False
+                new_record = Training(tr_input_file=tr_input_file, training_date=training_date, training_accuracy=training_accuracy, testing_accuracy=testing_accuracy, model_weights=model_weights, is_deployed=is_deployed)
+                new_record.save()
+                messages.info(request, ("Model retraining is completed successfully."))
+            else:
+                messages.info(request, ("The uploaded json file does not adhere to the required schema!"))
         else:
             tr_error_messages = tr_upload_form.errors.values()
             return render(request, "training.html", {'training_list': training_list, 'tr_upload_form': tr_upload_form, 'tr_error_messages': tr_error_messages})
