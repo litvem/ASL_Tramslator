@@ -165,6 +165,17 @@ python -m unittest .\pipelines\pipes\test_data_prepare_pipeline.py
 **Note** 
 This check has been added after deployment so you can not see this function in the deployed app. To see this test, you need to clone the project and run it locally.
 
+## Usage and visuals
+The system differentiates between two distinct groups of users: typical users, which use the system to obtain translation of ASL, and administrators, which maintain and update the deep learning models used to generate such translation.
+
+When a user wishes to utilize the system, they will first navigate to the web address at which the system is currently being hosted. Once there, the user will be greeted with a home page, detailing the functionalities of the system, and the opportunity to log in. If a user doesn’t already have a system account, they must create one first before being able to utilize the system’s functionalities.
+
+Once successfully logged in, the user will be presented with the option to either upload a video file they wish to be translated, or begin live translation. If they select the former, they will be prompted to select and upload a video file, which must be in the .mp4 format, and mustn’t exceed 10Mb in size. The user will be informed if they attempt to upload a file that doesn’t meet those constraints, and prompted to choose a different file to translate. Once the user successfully uploads a video file to be translated, the translation process will automatically begin, and the user will be notified when the translation is finished. At that time, the user will be able download and view the generated text in the form of a .txt file.
+
+Otherwise, if the user opts to rather use the live translation functionality, they will be redirected to a page where they will be able to see the real time feed from their connected camera. When the system detects that the user has performed a sign, that sign will be translated into text, and that text will be overlaid as a caption over the top section of the camera feed. This process will continue until the user exits the live translation page.
+
+On the other hand, if the user logs in using administrator credentials (this can be done from the same place where a regular user would log in), they will additionally be able to access and administrator only section of the site where they will be able to see the details of each currently trained model, provide additional data to train a new model, and select which model is to be used by the system to create translations.
+
 
 
 ## Project developers
