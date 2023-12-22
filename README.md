@@ -133,14 +133,14 @@ To run the unit tests for data prepare pipline do the following steps:
 1. comment out line 17 (from website.models import *)
 2. comment Lines 136 to 144 for testing like below:
 ```
-    last_uploaded_json_file = json.loads((Training_input.objects.latest('tr_input_id').tr_input_file).read().decode('utf-8'))
-     print(Training_input.objects.latest('tr_input_id').tr_input_file)
+    #last_uploaded_json_file = json.loads((Training_input.objects.latest('tr_input_id').tr_input_file).read().decode('utf-8'))
+    #print(Training_input.objects.latest('tr_input_id').tr_input_file)
     # data_handler = DataHandler(db_file = os.path.abspath('data/data.db'))
-     data_handler.insert_data(json_file=last_uploaded_json_file)
+    #data_handler.insert_data(json_file=last_uploaded_json_file)
     # clean_texts = [entry.get("clean_text", "") for entry in last_uploaded_json_file]
-     actions_O = np.array(clean_texts)
-     print(actions_O)
-     actions = actions_O
+    #actions_O = np.array(clean_texts)
+    #print(actions_O)
+    #actions = actions_O
 
 ```
 
