@@ -11,6 +11,7 @@ from tensorflow.keras.utils import to_categorical
 from sklearn.metrics import accuracy_score
 from sklearn.base import BaseEstimator, TransformerMixin
 import json
+# comment this line for testing
 from website.models import *
 from data.upload_retraining_json_to_db import DataHandler
 from sklearn.metrics import accuracy_score
@@ -64,6 +65,7 @@ class TrainModelTransformer(BaseEstimator, TransformerMixin):
         sequences, labels = [], []
         #for all the actions and all their videos (folders of np arrays)
         
+        # Comment lines 69 to 72 for testing
         last_uploaded_json_file = json.loads((Training_input.objects.latest('tr_input_id').tr_input_file).read().decode('utf-8'))
         clean_texts = [entry.get("clean_text", "") for entry in last_uploaded_json_file]
         actions_retrain= np.array(clean_texts)

@@ -13,6 +13,7 @@ import json
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.pipeline import Pipeline
+# Comment this line for testing
 from website.models import *
 from data.upload_retraining_json_to_db import DataHandler
 
@@ -102,7 +103,7 @@ def save_videos(data_point, videos_address, sequence_length, np_address, video_i
         except youtube_dl.DownloadError as e:
             print("Error during download:", e)
     # crop video
-    subprocess.run(['ffmpeg', '-y', '-i',
+    subprocess.run(['C:/Users/yasi7/anaconda3/pkgs/ffmpeg-4.3.1-ha925a31_0/Library/bin/ffmpeg.exe', '-y', '-i',
                      dir_name + "/" + "current" + ".mp4",
                      '-ss', str(start_time), '-t', str(end_time - start_time), file_name])
 
@@ -131,6 +132,7 @@ def save_videos(data_point, videos_address, sequence_length, np_address, video_i
 #gets the training data from the database
 def prepare_data(X, DATA_PATH, actions, sequence_length, videos_folder, DB_path):
     
+    # Lines 136 to 144 for testing
     last_uploaded_json_file = json.loads((Training_input.objects.latest('tr_input_id').tr_input_file).read().decode('utf-8'))
     print(Training_input.objects.latest('tr_input_id').tr_input_file)
 
