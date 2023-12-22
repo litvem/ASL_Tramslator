@@ -160,6 +160,10 @@ python -m unittest .\pipelines\pipes\test_data_prepare_pipeline.py
 ```
 6. After running the tests, make the pipelines/pipes/test2/MP_data empty.
 
+7. Here is a screenshot of how the tests look after running:
+
+![tests](/img/test_data_prepare_pipeline.png)
+
 ### Retrain data format/shcema verification
 
 **Note** 
@@ -176,6 +180,9 @@ Otherwise, if the user opts to rather use the live translation functionality, th
 
 On the other hand, if the user logs in using administrator credentials (this can be done from the same place where a regular user would log in), they will additionally be able to access and administrator only section of the site where they will be able to see the details of each currently trained model, provide additional data to train a new model, and select which model is to be used by the system to create translations.
 
+![homepage](/img/homepage.png)
+![models](/img/models.png)
+![translations](/img/translations.png)
 
 
 ## Project developers
