@@ -65,6 +65,16 @@ pip install -r requirements.txt
 ```
 python manage.py runserver
 ```
+
+### Docker image
+The image used for deployment can be found in one of our team members accounts which is public and can be pulled. In order to access it run the command below:
+```
+docker pull gusfazya/asl-app:03
+```
+For running it do the command below:
+```
+docker run gusfazya/asl-app:03
+```
 ## Deployment
 
 The application is deployed on Kubernetes engine on Google cloud. To access the website follow this link: http://34.140.181.224:80
@@ -79,9 +89,8 @@ In case by the time you are testing this, the website is down for running out of
 3. Add the addresses for which you want to ignore this policy: http://34.140.181.224/live/
 4. Restart Chrome
 
-For that the following steps have been taken. Note that the required files and correct project structure is in "cloud-deployment" branch.
+For that the following steps have been taken. ***Note that the required files and correct project structure is in "cloud-deployment" branch. So please make sure you swtich to that branch.***
 
-### Docker image
 1. navigate to the project directory 
 ```
 cd asl_translator_gui
