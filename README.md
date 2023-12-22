@@ -127,6 +127,46 @@ gcloud container clusters get-credentials [the name of the cluster] --location=[
 kubectl apply -f polls.yaml
 ```
 
+## Tests
+### Pipeline tests
+To run the unit tests for data prepare pipline do the following steps:
+1. comment out line 17 (from website.models import *)
+2. comment Lines 136 to 144 for testing like below:
+```
+    last_uploaded_json_file = json.loads((Training_input.objects.latest('tr_input_id').tr_input_file).read().decode('utf-8'))
+     print(Training_input.objects.latest('tr_input_id').tr_input_file)
+    # data_handler = DataHandler(db_file = os.path.abspath('data/data.db'))
+     data_handler.insert_data(json_file=last_uploaded_json_file)
+    # clean_texts = [entry.get("clean_text", "") for entry in last_uploaded_json_file]
+     actions_O = np.array(clean_texts)
+     print(actions_O)
+     actions = actions_O
+
+```
+
+3. navigate to the project directory 
+```
+cd asl_translator_gui
+```
+4. Run the virtual environemnt by the follwoing command:  
+``` 
+pipenv shell 
+```
+
+5. Run the following command to run the tests:
+
+```
+python -m unittest .\pipelines\pipes\test_data_prepare_pipeline.py
+```
+6. After running the tests, make the pipelines/pipes/test2/MP_data empty.
+
+### Retrain data format/shcema verification
+
+**Note** 
+This check has been added after deployment so you can not see this function in the deployed app. To see this test, you need to clone the project and run it locally.
+
+
+
 ## Project developers
 - Yasamin Fazelidehkordi @yasaminf
 - Emma Litvin @litvin
