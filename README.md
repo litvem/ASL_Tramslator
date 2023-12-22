@@ -128,6 +128,7 @@ kubectl apply -f polls.yaml
 ```
 
 ## Tests
+
 ### Pipeline tests
 To run the unit tests for data prepare pipline do the following steps:
 1. comment out line 17 (from website.models import *)
@@ -168,6 +169,8 @@ python -m unittest .\pipelines\pipes\test_data_prepare_pipeline.py
 
 **Note** 
 This check has been added after deployment so you can not see this function in the deployed app. To see this test, you need to clone the project and run it locally.
+
+For this we check if the retraining data is in the expected schema and that the assumptions about the exptected values are held.
 
 ## Usage and visuals
 The system differentiates between two distinct groups of users: typical users, which use the system to obtain translation of ASL, and administrators, which maintain and update the deep learning models used to generate such translation.
