@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: web
-        image: docker.io/gusfazya/asl-app:01
+        image: docker.io/gusfazya/asl-app:03
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
