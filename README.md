@@ -1,5 +1,4 @@
-## Project name
-**ASL Translator tool**
+# ASL Translator tool
 
 ## Description
 The **ASL Translator** is an advanced technological tool that leverages deep learning and computer vision techniques by using a camera to detect ASL gestures, including movements of hands, head, and facial expression, and translating them to written text, either in real-time, or based on a pre-recorded video file.<br>
